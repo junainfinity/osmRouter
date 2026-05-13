@@ -1,0 +1,51 @@
+# Caddy reverse-proxy config for osmRouter.
+# Caddy auto-fetches and renews Let's Encrypt certificates.
+#
+# Drop this in /etc/caddy/Caddyfile (adjust paths), then `caddy reload`.
+
+# ---- Dashboard ----
+osmrouter.com, www.osmrouter.com, app.osmrouter.com {
+    reverse_proxy 127.0.0.1:3000
+
+    # Standard hardening headers — the dashboard itself also sets CSP, but
+    # belt-and-braces here doesn't hurt.
+    header {
+        Strict-Transport-Security "max-age=63072000; includeSubDomains; preload"
+        X-Content-Type-Options "nosniff"
+        Referrer-Policy "strict-origin-when-cross-origin"
+    }
+
+    encode gzip zstd
+}
+
+# ---- Control Plane API ----
+api.osmrouter.com {
+    reverse_proxy 127.0.0.1:8080
+
+    header {
+        Strict-Transport-Security "max-age=63072000; includeSubDomains; preload"
+    }
+}
+
+# ---- Proxy node (public visitor traffic) ----
+# Wildcard so every customer's `app.their-domain.com` lands here.
+# Customers point their CNAME at `nodes.osmrouter.com`.
+nodes.osmrouter.com, *.osmrouter.com {
+    @notdashboard not host osmrouter.com www.osmrouter.com app.osmrouter.com api.osmrouter.com nodes.osmrouter.com
+    handle @notdashboard {
+        reverse_proxy 127.0.0.1:8000
+    }
+    # nodes.osmrouter.com health page
+    respond "osmRouter proxy node OK" 200
+}
+
+# ---- Proxy node (tunnel client connections) ----
+tunnel.osmrouter.com {
+    reverse_proxy 127.0.0.1:8001 {
+        # Long-lived WebSockets need a large idle timeout.
+        transport http {
+            keepalive 5m
+            keepalive_idle_conns 0
+        }
+    }
+}

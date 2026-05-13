@@ -1,0 +1,393 @@
+<!doctype html>
+<html lang="en" data-theme="dark">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>osmRouter Whitepaper</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;450;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root {
+  --accent: oklch(72% 0.16 252);
+  --accent-soft: oklch(72% 0.16 252 / 0.14);
+  --accent-line: oklch(72% 0.16 252 / 0.35);
+  --bg: #08090b; --bg-panel: #0e0f12; --bg-soft: #131418; --bg-sunken: #1a1c20;
+  --border: #1f2127; --border-strong: #2a2d34;
+  --text: #f4f4f3; --text-muted: #9a9da4; --text-faint: #5f6168;
+  --success: oklch(64% 0.15 152); --danger: oklch(60% 0.21 25);
+  --font-sans: 'Inter', -apple-system, BlinkMacSystemFont, system-ui, sans-serif;
+  --font-mono: 'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, monospace;
+}
+@media (prefers-color-scheme: light) {
+  :root[data-theme="dark"] { } /* keep dark by default; toggle below switches */
+}
+* { box-sizing: border-box; }
+html, body { margin: 0; padding: 0; }
+body {
+  background: var(--bg); color: var(--text);
+  font-family: var(--font-sans); font-size: 15px; line-height: 1.6;
+  -webkit-font-smoothing: antialiased; text-rendering: optimizeLegibility;
+}
+.wrap { max-width: 760px; margin: 0 auto; padding: 56px 32px 96px; }
+.eyebrow {
+  font-family: var(--font-mono); font-size: 11.5px; letter-spacing: 0.08em;
+  text-transform: uppercase; color: var(--accent); margin-bottom: 8px;
+}
+h1 { font-size: 40px; font-weight: 600; letter-spacing: -0.025em; line-height: 1.1; margin: 0 0 14px; }
+h1 + p { color: var(--text-muted); font-size: 18px; margin: 0 0 8px; }
+h1 + p + p { color: var(--text-faint); font-style: italic; font-size: 13px; margin: 4px 0 56px; }
+h2 {
+  font-size: 22px; font-weight: 600; letter-spacing: -0.015em;
+  margin: 56px 0 14px; padding-top: 24px; border-top: 1px solid var(--border);
+}
+h3 { font-size: 17px; font-weight: 600; margin: 32px 0 10px; }
+h4 { font-size: 15px; font-weight: 600; margin: 24px 0 8px; }
+p, ul, ol, blockquote { margin: 0 0 16px; }
+a { color: var(--accent); text-decoration: none; border-bottom: 1px dotted var(--accent-line); }
+a:hover { border-bottom-style: solid; }
+strong { font-weight: 600; color: var(--text); }
+em { font-style: italic; color: var(--text-muted); }
+code {
+  font-family: var(--font-mono); font-size: 0.88em;
+  background: var(--bg-soft); border: 1px solid var(--border); border-radius: 4px;
+  padding: 1px 6px;
+}
+pre {
+  font-family: var(--font-mono); font-size: 12.5px; line-height: 1.55;
+  background: var(--bg-sunken); border: 1px solid var(--border); border-radius: 10px;
+  padding: 16px 20px; overflow-x: auto;
+  box-shadow: 0 1px 0 rgba(0,0,0,0.4);
+  margin: 0 0 24px;
+}
+pre code { background: transparent; border: 0; padding: 0; font-size: inherit; color: var(--text); }
+blockquote {
+  border-left: 2px solid var(--accent-line);
+  background: var(--accent-soft);
+  padding: 12px 16px; border-radius: 0 8px 8px 0;
+  color: var(--text); font-style: normal;
+}
+hr { border: 0; border-top: 1px solid var(--border); margin: 48px 0; }
+ul, ol { padding-left: 22px; }
+li { margin: 6px 0; }
+table {
+  width: 100%; border-collapse: collapse; margin: 0 0 24px;
+  font-size: 13.5px; background: var(--bg-panel); border: 1px solid var(--border); border-radius: 10px;
+  overflow: hidden;
+}
+th, td { padding: 10px 14px; border-bottom: 1px solid var(--border); text-align: left; vertical-align: top; }
+th { font-family: var(--font-mono); font-size: 11.5px; text-transform: uppercase; letter-spacing: 0.06em; color: var(--text-muted); background: var(--bg); }
+tbody tr:last-child td { border-bottom: 0; }
+tbody tr:hover { background: var(--bg-soft); }
+.theme-toggle {
+  position: fixed; top: 16px; right: 20px; z-index: 10;
+  display: inline-flex; gap: 6px; padding: 4px 10px;
+  font-family: var(--font-mono); font-size: 11.5px; color: var(--text-muted);
+  background: var(--bg-panel); border: 1px solid var(--border); border-radius: 999px;
+  cursor: pointer;
+}
+.theme-toggle:hover { color: var(--text); border-color: var(--border-strong); }
+:root[data-theme="light"] {
+  --bg: #fafaf9; --bg-panel: #ffffff; --bg-soft: #f4f4f3; --bg-sunken: #ededec;
+  --border: #e7e7e5; --border-strong: #d4d4d2;
+  --text: #0a0a0a; --text-muted: #6b6b6b; --text-faint: #9a9a9a;
+  --accent: oklch(62% 0.19 252); --accent-soft: oklch(62% 0.19 252 / 0.10);
+  --accent-line: oklch(62% 0.19 252 / 0.30);
+}
+:root[data-theme="dark"] .light-only { display: none; }
+:root[data-theme="light"] .dark-only { display: none; }
+img { max-width: 100%; height: auto; border-radius: 8px; border: 1px solid var(--border); }
+.footer {
+  margin-top: 80px; padding-top: 24px; border-top: 1px solid var(--border);
+  color: var(--text-faint); font-size: 12.5px;
+}
+.footer code { font-size: 11.5px; }
+</style>
+
+</head>
+<body>
+<button class="theme-toggle" onclick="toggleTheme()">
+  <span class="dark-only">☼ light</span>
+  <span class="light-only">☾ dark</span>
+</button>
+<main class="wrap">
+<h1>osmRouter Whitepaper</h1>
+<p><strong>Sovereign tunneling for the next billion local apps.</strong></p>
+<p><em>v1.0 · May 2026 · The osmRouter Project</em></p>
+<hr>
+<h2>Abstract</h2>
+<p>Every developer eventually needs to expose a local service to the public internet. Today that&#39;s done with a small set of incumbent tunneling services — ngrok, Cloudflare Tunnel, Tailscale Funnel — each of which trades convenience for control. The address you get is theirs. The TLS certificate is theirs. The DNS namespace is theirs. The routing brain is theirs. Your laptop is just a leaf.</p>
+<p>osmRouter inverts that relationship. It is a <strong>sovereign reverse-tunnel system</strong>: visitors connect through a public proxy fleet you (or your organisation) control, traffic terminates inside a persistent outbound tunnel into the user&#39;s own machine, and <em>every layer is operated by the same entity that uses it</em> — no third-party SaaS in the request path. We separate the system into a <strong>Control Plane</strong> (auth, billing, DNS records, device locks, audit) and a <strong>Data Plane</strong> (the reverse-proxy fleet) so the brain stays online even when the hands restart. This paper describes the architecture, the user experience, the security posture, and the operating model.</p>
+<h2>1. The Problem</h2>
+<p>A handful of recurring failures with today&#39;s tunneling services:</p>
+<ol>
+<li><strong>You don&#39;t own the address.</strong> With most providers the public URL is <code>whatever.their-domain.com</code>. You can attach a custom domain on paid tiers, but the certificate and the DNS still flow through their control plane.</li>
+<li><strong>No device locking.</strong> If your tunnel token leaks, it can be reused anywhere. There&#39;s no first-class concept of &quot;this domain serves traffic from <em>this</em> machine and no other.&quot;</li>
+<li><strong>Vendor lock-in.</strong> Moving off the provider is a project, not a config change. The tunnel protocol, the routing rules, and the SSL provisioning are all theirs.</li>
+<li><strong>Limited residency control.</strong> For teams in jurisdictions with data-protection acts (India&#39;s DPDP, the EU&#39;s GDPR, etc.) the lack of choice about where the proxy actually runs is a real compliance gap.</li>
+<li><strong>Opaque failure modes.</strong> When the tunnel drops, what the visitor sees depends on the provider — usually an unbranded error page that says &quot;the host is offline&quot; with no context, no retry guidance, and no operator visibility.</li>
+</ol>
+<p>Each of these is solvable in isolation. None of them is solved well by any single product today.</p>
+<h2>2. The Vision</h2>
+<p>osmRouter is the <strong>Sovereign Gateway</strong>. The thesis is simple: a serious operator should be able to run the entire path from public visitor to local app on infrastructure they control, with the user experience of a hosted SaaS.</p>
+<p>Three concrete commitments follow:</p>
+<ol>
+<li><strong>Bring-your-own-domain by default, not by upsell.</strong> Every user can attach a domain they own. DNS verification is HMAC-bound to the operator&#39;s secret, so the verification token can&#39;t be forged externally.</li>
+<li><strong>Device-locked tunnels.</strong> A subdomain binds to a single authenticated device. Revoke the device → traffic stops in milliseconds. Move it to a new device → one click in the dashboard.</li>
+<li><strong>Operator-controlled data plane.</strong> The proxy fleet is the operator&#39;s binaries on the operator&#39;s machines, in the operator&#39;s chosen regions. No third-party packet inspection between the visitor and the tunnel.</li>
+</ol>
+<h2>3. The Solution: Architecture at a Glance</h2>
+<p>osmRouter is split into two planes that talk over a thin, well-defined interface:</p>
+<pre><code>                  ┌──────────────────────┐
+                  │  Control Plane       │
+                  │  - Next.js dashboard │
+                  │  - Go API server     │
+                  │  - PostgreSQL        │
+                  │  - Redis (live map)  │
+                  └──────────┬───────────┘
+                             │ writes routing intent
+                             ▼
+                  ┌──────────────────────┐
+                  │  Data Plane          │
+                  │  (one or more nodes) │
+                  │  - public listener   │
+                  │  - tunnel listener   │
+                  │  - reads live map    │
+                  └──────────┬───────────┘
+                             │ persistent WS tunnel
+                             ▼
+                  ┌──────────────────────┐
+                  │  Desktop tunnel-client│
+                  │  + the user&#39;s app    │
+                  └──────────────────────┘
+</code></pre>
+<p>The Control Plane is the brain. It manages users, billing, DNS records, device locks, audit logs, and the WebSocket channel that streams real-time events to the dashboard. It writes &quot;routing intent&quot; into Redis: a key per public hostname (<code>live:api.acme.com</code>) whose value is the <code>device_id</code> currently authorised to serve that hostname.</p>
+<p>The Data Plane is the muscle. Each proxy node terminates visitor traffic, looks up the Redis mapping, finds the corresponding tunnel in its in-memory registry, and pipes bytes between the visitor and the desktop client across a persistent WebSocket. Proxy nodes have no opinion about who the user is or what the policy is — they just route per what Redis tells them.</p>
+<p>The desktop tunnel-client is a single Go binary that maintains an outbound WebSocket to the proxy. It receives request frames, makes the corresponding HTTP call against the user&#39;s local app, and sends back a response frame.</p>
+<p><strong>Why a Control / Data split?</strong> Because the failure profiles are different:</p>
+<ul>
+<li>The Control Plane is OLTP-y: small writes, careful auth, audit-heavy, infrequent restarts.</li>
+<li>The Data Plane is throughput-y: large byte transfer, low-latency hot paths, frequent restarts during deploys, regional fanout.</li>
+</ul>
+<p>Treating them as one process forces the slow concerns onto the fast path. Treating them as two lets the operator scale each independently and lets each restart without taking the other down.</p>
+<h2>4. Key Features</h2>
+<h3>4.1 Frictionless DNS</h3>
+<p>Adding a domain is a two-record copy-paste. The user enters their FQDN; the dashboard generates a CNAME target (<code>nodes.osmrouter.net</code> in the hosted plan, configurable in self-hosted) and a TXT verification token. The TXT token is <code>osm-verify=&lt;HMAC&gt;</code> where the HMAC is computed over <code>(user_id, fqdn, server_secret)</code>. The verifier worker polls public DNS, confirms both records, and flips the domain&#39;s status to <code>verified</code>. The user gets a real-time WebSocket event the moment it lands.</p>
+<h3>4.2 Device Locking &amp; &quot;Reset Lock&quot;</h3>
+<p>A subdomain (e.g. <code>app.acme.com</code>) binds to exactly one device. The bind is transactional: the Postgres row and the Redis key are written in a single transaction; if the Redis write fails, the Postgres row is rolled back. There&#39;s no state where the database thinks the binding happened but the routing table disagrees.</p>
+<p>If the user wants to move the domain to a different device — broken laptop, different office, whatever — they click <strong>Reset Lock</strong> in the dashboard. The Postgres row is updated, the Redis key is deleted, and any active tunnel on the previous device is sent a <code>close{reason: &quot;replaced&quot;}</code> frame.</p>
+<h3>4.3 Holding State on Disconnect</h3>
+<p>When a tunnel drops — laptop closes, network flips — the proxy doesn&#39;t immediately return errors. Visitors hitting the (still-mapped) hostname receive a clean <strong>HTTP 503 with a &quot;Reconnecting…&quot; page</strong> for the first 30 seconds. The page auto-refreshes; if the client comes back during the grace window, the visitor&#39;s next request flows through normally and they may not even notice.</p>
+<p>This is small but matters a lot in the field. Wi-Fi blips, laptop wakes, and CGNAT IP rotations are routine. Burning a request with <code>502 Bad Gateway</code> per blip would be a continuous papercut for both the operator and the visitor.</p>
+<h3>4.4 Real-Time Dashboard</h3>
+<p>Everything that happens in the system streams to the user&#39;s dashboard over a persistent WebSocket: DNS verification flips, devices coming online or offline, subdomains being bound/unbound, tunnels opening and closing. The dashboard is &quot;infrastructure-tool&quot; aesthetic — dark theme by default, OKLCH colour palette, mono numerics — but ports cleanly to a light theme.</p>
+<h3>4.5 Admin Command Center</h3>
+<p>For operators running osmRouter for a customer base or internal teams, the Admin role unlocks:</p>
+<ul>
+<li>A live network overview (online devices, verified domains, total active tunnels)</li>
+<li>Paginated user search with full dossier (devices, domains, recent audit log entries)</li>
+<li><strong>Impersonation</strong> — issuing a short-lived JWT with an <code>impersonated_by</code> claim. Every action under impersonation is double-audited (actor + target).</li>
+<li>Append-only audit log of every destructive action across the whole system.</li>
+</ul>
+<h3>4.6 Audit Log</h3>
+<p>Every destructive action — user created, password changed, refresh token reused, device revoked, subdomain bound, admin impersonates — writes a row to the <code>audit_logs</code> table. The table is structured so the application role can only <code>INSERT</code> and <code>SELECT</code>; there&#39;s no <code>UPDATE</code> or <code>DELETE</code> granted. Tampering with the audit trail requires direct DB-superuser access, which is monitored separately.</p>
+<h2>5. Security Posture</h2>
+<p>osmRouter&#39;s security architecture is the subject of a separate document (the Yellow Paper). The summary version, mapped to the threats they address:</p>
+<table>
+<thead>
+<tr>
+<th>Threat</th>
+<th>Control</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>Stolen password</td>
+<td>Argon2id at rest (m=64MB, t=3, p=4, 32-byte key), constant-time verify</td>
+</tr>
+<tr>
+<td>Stolen session cookie</td>
+<td>JWT access tokens limited to 15 minutes; refresh rotation chain that detects re-use and revokes the entire chain</td>
+</tr>
+<tr>
+<td>Cross-site request forgery</td>
+<td>Double-submit token, HttpOnly+SameSite=Lax cookies, strict CORS allow-list</td>
+</tr>
+<tr>
+<td>Credential stuffing / brute force</td>
+<td>Per-IP token-bucket rate limit on auth routes (5/minute)</td>
+</tr>
+<tr>
+<td>Forged DNS verification</td>
+<td>HMAC token bound to operator&#39;s secret — unforgeable without it</td>
+</tr>
+<tr>
+<td>Tunnel hijack</td>
+<td>Device API key validated server-side at every tunnel connect; revoke is single-click</td>
+</tr>
+<tr>
+<td>Algorithm confusion (alg=none)</td>
+<td>Explicit allowlist of <code>HS256</code> only; alg=none JWTs rejected</td>
+</tr>
+<tr>
+<td>Cross-user data leakage</td>
+<td>Every database query scopes by actor <code>user_id</code>; integration-tested</td>
+</tr>
+<tr>
+<td>TLS downgrade</td>
+<td>TLS 1.3 at the edge (Cloudflare for SaaS in the hosted plan); proxy nodes require WSS in production</td>
+</tr>
+</tbody></table>
+<p>We assume Zero-Trust: the public internet is hostile, the user&#39;s local network is compromised, any one proxy node could be intercepted. Every layer is designed so a compromise at one boundary does not compromise the others.</p>
+<h2>6. Use Cases</h2>
+<p>osmRouter&#39;s primary persona is a developer who wants production-shaped public hostnames for things running on their machine — but it generalises.</p>
+<ul>
+<li><strong>Demo links.</strong> A <code>demo-acme.com</code> that&#39;s <em>always</em> you, regardless of which Wi-Fi you&#39;re on.</li>
+<li><strong>Hardware in the field.</strong> A retail kiosk in a CGNAT&#39;d shopping mall can serve its admin dashboard over <code>kiosk-3.your-domain.com</code> without the franchise needing a public IP.</li>
+<li><strong>IoT control panels.</strong> A 3D printer&#39;s web UI, a home media server, a Pi running a side project — all accessible at a domain you own, without poking holes in routers.</li>
+<li><strong>Sovereign-compliance hosting.</strong> Self-hosted on infrastructure in the right region. The data plane is yours; nothing leaves jurisdiction.</li>
+<li><strong>Internal-network bridges.</strong> Connect an internal staging server to a public verifiable URL for a partner integration, then revoke in one click when the engagement ends.</li>
+</ul>
+<h2>7. Comparison to Alternatives</h2>
+<table>
+<thead>
+<tr>
+<th></th>
+<th>osmRouter</th>
+<th>ngrok</th>
+<th>Cloudflare Tunnel</th>
+<th>Tailscale Funnel</th>
+<th>FRP (self-host)</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>Custom domain on free tier</td>
+<td>✓</td>
+<td>—</td>
+<td>✓</td>
+<td>partial</td>
+<td>✓</td>
+</tr>
+<tr>
+<td>Operator-controlled proxy fleet</td>
+<td>✓</td>
+<td>—</td>
+<td>—</td>
+<td>—</td>
+<td>✓</td>
+</tr>
+<tr>
+<td>Device locking by default</td>
+<td>✓</td>
+<td>—</td>
+<td>—</td>
+<td>partial</td>
+<td>manual</td>
+</tr>
+<tr>
+<td>Built-in dashboard</td>
+<td>✓</td>
+<td>✓</td>
+<td>✓</td>
+<td>✓</td>
+<td>—</td>
+</tr>
+<tr>
+<td>Admin / multi-tenant out of the box</td>
+<td>✓</td>
+<td>✓</td>
+<td>✓</td>
+<td>—</td>
+<td>—</td>
+</tr>
+<tr>
+<td>Holding state on disconnect</td>
+<td>✓</td>
+<td>✓</td>
+<td>partial</td>
+<td>—</td>
+<td>—</td>
+</tr>
+<tr>
+<td>Audit log</td>
+<td>✓</td>
+<td>✓</td>
+<td>✓</td>
+<td>partial</td>
+<td>—</td>
+</tr>
+<tr>
+<td>Self-hostable end-to-end</td>
+<td>✓</td>
+<td>—</td>
+<td>—</td>
+<td>—</td>
+<td>✓</td>
+</tr>
+</tbody></table>
+<p>The honest summary: <strong>osmRouter sits between ngrok-style polish and FRP-style sovereignty.</strong> You get the dashboard, the auth, the audit trail, the device locks, and the holding state — but every byte of the request path is your binary on your machine.</p>
+<h2>8. Operating Model</h2>
+<p>osmRouter is delivered as four artefacts that can run independently:</p>
+<ol>
+<li><strong><code>server/</code></strong> — Control Plane API (one Docker image, ~80 MB)</li>
+<li><strong><code>web/</code></strong> — Next.js dashboard (one Docker image, ~250 MB)</li>
+<li><strong><code>proxy-node/</code></strong> — fleet node (one Docker image, ~30 MB)</li>
+<li><strong><code>tunnel-client/</code></strong> — desktop binary (single 12 MB Go binary, macOS / Windows / Linux)</li>
+</ol>
+<p>A reasonable production deployment runs one Control Plane (with a DB cluster and a Redis cluster), N proxy nodes across the regions you care about, and the dashboard behind whatever CDN you already use. The desktop binary is the only artefact that goes to end users.</p>
+<p>For demos and small teams, all four run on a single host. The <code>scripts/demo_live.sh</code> script in this repository spins up the full stack in under a minute on a developer Mac.</p>
+<h2>9. Roadmap</h2>
+<p><strong>Shipped (v1.0 — what this paper describes):</strong></p>
+<ul>
+<li>Full Control Plane with auth, OTP, JWT rotation, CSRF, rate limiting, audit log</li>
+<li>Full dashboard (marketing, auth, user app pages, admin)</li>
+<li>Data Plane proxy node with WebSocket tunnel</li>
+<li>Desktop tunnel-client</li>
+<li>End-to-end demo (<code>scripts/demo_live.sh</code>) and cross-boundary demo (<code>scripts/docker_remote_laptop_demo.sh</code>)</li>
+</ul>
+<p><strong>v1.1 — Hardening (next):</strong></p>
+<ul>
+<li>Real Cloudflare-for-SaaS integration (auto-provision SSL for custom domains)</li>
+<li>Stripe billing wired through the plans table</li>
+<li>WebAuthn for admin MFA</li>
+<li>Per-node mTLS for proxy → Control Plane communication</li>
+<li>Tunnel-ingest wiring: the <code>tunnels</code> table populated for every connection, so <code>bytes_transferred</code> and <code>active_tunnels</code> are real numbers</li>
+<li>Streaming response bodies through the tunnel (currently buffered, 4 MB cap)</li>
+<li>&quot;Mid-stream splice&quot; reconnect: visitors don&#39;t even see the holding-state page on transient client blips</li>
+</ul>
+<p><strong>v2.0 — Scale (later):</strong></p>
+<ul>
+<li>Anycast / GeoDNS for proxy node selection</li>
+<li>gRPC + HTTP/2 frame transport (current is WebSocket + JSON — same wire shape but more debuggable)</li>
+<li>Read replicas with automatic leader promotion</li>
+<li>Per-proxy-node observability dashboards</li>
+<li>Cross-region failover with sub-60-second cutover</li>
+</ul>
+<h2>10. Conclusion</h2>
+<p>The goal of osmRouter is not to be cleverer than ngrok. It&#39;s to make a kind of infrastructure that until now has been &quot;either polished-and-not-yours or yours-and-not-polished&quot; feel like both. Same dashboard quality, same auth flows, same uptime guarantees — but every layer is operated by the same hands that use it.</p>
+<p>This whitepaper has described the product surface; the Yellow Paper describes the protocol formally. The reference implementation in this repository is small enough that a single developer can read it end-to-end in a weekend and large enough that a real team can run a real production load on it.</p>
+<p>The web doesn&#39;t need to be more centralised. We&#39;re building osmRouter on the bet that, given a credible alternative, a lot of developers would prefer to keep their own keys.</p>
+<hr>
+<p><em>For the formal technical specification — wire protocol, state-transition functions, cryptographic parameters, formal security claims — see the companion <a href="../Yellow%20Paper/osmRouter-Yellow-Paper.md">Yellow Paper</a>.</em></p>
+<p><em>The full source, tests, deployment artefacts, and an Obsidian vault of design decisions live in this repository.</em></p>
+
+<div class="footer">
+  Source: the markdown sibling of this file in the same folder.
+  Reference implementation: <code>github.com/osmrouter</code> (in this repository).
+</div>
+</main>
+<script>
+function toggleTheme() {
+  const r = document.documentElement;
+  const next = r.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
+  r.setAttribute('data-theme', next);
+  try { localStorage.setItem('osm-paper-theme', next); } catch (e) {}
+}
+(function() {
+  try {
+    const t = localStorage.getItem('osm-paper-theme');
+    if (t) document.documentElement.setAttribute('data-theme', t);
+  } catch (e) {}
+})();
+</script>
+</body>
+</html>

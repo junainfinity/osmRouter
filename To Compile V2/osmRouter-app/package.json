@@ -1,0 +1,24 @@
+{
+  "name": "osmrouter-monorepo",
+  "version": "0.2.0",
+  "private": true,
+  "description": "osmRouter Mac v0.2 — desktop client (Electron + Next.js + Go, Option D wire protocol, embedded operator CA)",
+  "workspaces": [
+    "apps/*",
+    "packages/*"
+  ],
+  "scripts": {
+    "build:sidecar": "./scripts/compile-mac.sh sidecar",
+    "build:dmg": "./scripts/compile-mac.sh dmg",
+    "build:all": "./scripts/compile-mac.sh all",
+    "test:sidecar": "cd apps/sidecar && go test ./...",
+    "test:unit": "vitest run --project unit",
+    "test:security": "vitest run --project security",
+    "test:integration": "vitest run --project integration",
+    "test:all": "npm run test:unit && npm run test:security && npm run test:integration && npm run test:sidecar",
+    "lint": "echo 'lint OK (no lint config in v0.2)'"
+  },
+  "engines": {
+    "node": ">=20"
+  }
+}

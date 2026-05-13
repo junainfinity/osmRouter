@@ -1,0 +1,739 @@
+<!doctype html>
+<html lang="en" data-theme="dark">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>osmRouter Yellow Paper</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;450;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root {
+  --accent: oklch(72% 0.16 70);
+  --accent-soft: oklch(72% 0.16 70 / 0.14);
+  --accent-line: oklch(72% 0.16 70 / 0.35);
+  --bg: #08090b; --bg-panel: #0e0f12; --bg-soft: #131418; --bg-sunken: #1a1c20;
+  --border: #1f2127; --border-strong: #2a2d34;
+  --text: #f4f4f3; --text-muted: #9a9da4; --text-faint: #5f6168;
+  --success: oklch(64% 0.15 152); --danger: oklch(60% 0.21 25);
+  --font-sans: 'Inter', -apple-system, BlinkMacSystemFont, system-ui, sans-serif;
+  --font-mono: 'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, monospace;
+}
+@media (prefers-color-scheme: light) {
+  :root[data-theme="dark"] { } /* keep dark by default; toggle below switches */
+}
+* { box-sizing: border-box; }
+html, body { margin: 0; padding: 0; }
+body {
+  background: var(--bg); color: var(--text);
+  font-family: var(--font-sans); font-size: 15px; line-height: 1.6;
+  -webkit-font-smoothing: antialiased; text-rendering: optimizeLegibility;
+}
+.wrap { max-width: 760px; margin: 0 auto; padding: 56px 32px 96px; }
+.eyebrow {
+  font-family: var(--font-mono); font-size: 11.5px; letter-spacing: 0.08em;
+  text-transform: uppercase; color: var(--accent); margin-bottom: 8px;
+}
+h1 { font-size: 40px; font-weight: 600; letter-spacing: -0.025em; line-height: 1.1; margin: 0 0 14px; }
+h1 + p { color: var(--text-muted); font-size: 18px; margin: 0 0 8px; }
+h1 + p + p { color: var(--text-faint); font-style: italic; font-size: 13px; margin: 4px 0 56px; }
+h2 {
+  font-size: 22px; font-weight: 600; letter-spacing: -0.015em;
+  margin: 56px 0 14px; padding-top: 24px; border-top: 1px solid var(--border);
+}
+h3 { font-size: 17px; font-weight: 600; margin: 32px 0 10px; }
+h4 { font-size: 15px; font-weight: 600; margin: 24px 0 8px; }
+p, ul, ol, blockquote { margin: 0 0 16px; }
+a { color: var(--accent); text-decoration: none; border-bottom: 1px dotted var(--accent-line); }
+a:hover { border-bottom-style: solid; }
+strong { font-weight: 600; color: var(--text); }
+em { font-style: italic; color: var(--text-muted); }
+code {
+  font-family: var(--font-mono); font-size: 0.88em;
+  background: var(--bg-soft); border: 1px solid var(--border); border-radius: 4px;
+  padding: 1px 6px;
+}
+pre {
+  font-family: var(--font-mono); font-size: 12.5px; line-height: 1.55;
+  background: var(--bg-sunken); border: 1px solid var(--border); border-radius: 10px;
+  padding: 16px 20px; overflow-x: auto;
+  box-shadow: 0 1px 0 rgba(0,0,0,0.4);
+  margin: 0 0 24px;
+}
+pre code { background: transparent; border: 0; padding: 0; font-size: inherit; color: var(--text); }
+blockquote {
+  border-left: 2px solid var(--accent-line);
+  background: var(--accent-soft);
+  padding: 12px 16px; border-radius: 0 8px 8px 0;
+  color: var(--text); font-style: normal;
+}
+hr { border: 0; border-top: 1px solid var(--border); margin: 48px 0; }
+ul, ol { padding-left: 22px; }
+li { margin: 6px 0; }
+table {
+  width: 100%; border-collapse: collapse; margin: 0 0 24px;
+  font-size: 13.5px; background: var(--bg-panel); border: 1px solid var(--border); border-radius: 10px;
+  overflow: hidden;
+}
+th, td { padding: 10px 14px; border-bottom: 1px solid var(--border); text-align: left; vertical-align: top; }
+th { font-family: var(--font-mono); font-size: 11.5px; text-transform: uppercase; letter-spacing: 0.06em; color: var(--text-muted); background: var(--bg); }
+tbody tr:last-child td { border-bottom: 0; }
+tbody tr:hover { background: var(--bg-soft); }
+.theme-toggle {
+  position: fixed; top: 16px; right: 20px; z-index: 10;
+  display: inline-flex; gap: 6px; padding: 4px 10px;
+  font-family: var(--font-mono); font-size: 11.5px; color: var(--text-muted);
+  background: var(--bg-panel); border: 1px solid var(--border); border-radius: 999px;
+  cursor: pointer;
+}
+.theme-toggle:hover { color: var(--text); border-color: var(--border-strong); }
+:root[data-theme="light"] {
+  --bg: #fafaf9; --bg-panel: #ffffff; --bg-soft: #f4f4f3; --bg-sunken: #ededec;
+  --border: #e7e7e5; --border-strong: #d4d4d2;
+  --text: #0a0a0a; --text-muted: #6b6b6b; --text-faint: #9a9a9a;
+  --accent: oklch(62% 0.19 70); --accent-soft: oklch(62% 0.19 70 / 0.10);
+  --accent-line: oklch(62% 0.19 70 / 0.30);
+}
+:root[data-theme="dark"] .light-only { display: none; }
+:root[data-theme="light"] .dark-only { display: none; }
+img { max-width: 100%; height: auto; border-radius: 8px; border: 1px solid var(--border); }
+.footer {
+  margin-top: 80px; padding-top: 24px; border-top: 1px solid var(--border);
+  color: var(--text-faint); font-size: 12.5px;
+}
+.footer code { font-size: 11.5px; }
+</style>
+
+<script>
+window.MathJax = {
+  tex: { inlineMath: [['$', '$']], displayMath: [['$$','$$']], processEscapes: true },
+  options: { skipHtmlTags: ['script','noscript','style','textarea','pre'] }
+};
+</script>
+<script async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+
+</head>
+<body>
+<button class="theme-toggle" onclick="toggleTheme()">
+  <span class="dark-only">☼ light</span>
+  <span class="light-only">☾ dark</span>
+</button>
+<main class="wrap">
+<h1>osmRouter Yellow Paper</h1>
+<p><strong>A formal specification of the osmRouter sovereign-tunneling protocol.</strong></p>
+<p><em>v1.0 · May 2026 · The osmRouter Project</em></p>
+<hr>
+<h2>Abstract</h2>
+<p>This paper specifies the wire formats, state-transition functions, cryptographic primitives, and security properties of the osmRouter system. The intended audience is implementers of compatible clients and proxy nodes, security reviewers, and operators who need a precise reference for what the system promises. Where the Whitepaper describes <em>what</em> osmRouter does, this paper specifies <em>how</em> — with enough rigour to write a conformant alternate implementation.</p>
+<h2>1. Notation and Conventions</h2>
+<p>Throughout this document:</p>
+<ul>
+<li>$\mathbb{B}$ denotes the set of all byte strings, $\mathbb{B}^n$ the set of length $n$.</li>
+<li>$\mathbb{Z}_n$ denotes integers modulo $n$.</li>
+<li>$|$ denotes byte-string concatenation.</li>
+<li>$\overset{\$}\leftarrow$ denotes uniform random sampling.</li>
+<li>$H(x)$ denotes SHA-256 of $x$, with output in $\mathbb{B}^{32}$.</li>
+<li>$\text{HMAC}_k(m)$ denotes HMAC-SHA-256 with key $k$ over message $m$.</li>
+<li>$\text{Argon2id}(p, s, \theta)$ denotes the Argon2id key-derivation function over password $p$, salt $s$, parameters $\theta$.</li>
+<li>$\text{AES}\text{-}\text{GCM}_k(\text{nonce}, \text{plaintext})$ denotes authenticated encryption.</li>
+<li>$\langle a, b, c \rangle$ denotes a tuple.</li>
+<li>All byte strings are big-endian where ordering matters.</li>
+</ul>
+<p>API endpoints follow REST conventions. All HTTP responses use <code>Content-Type: application/json</code> unless otherwise noted. All times are ISO-8601 with a <code>Z</code> suffix unless stated.</p>
+<h2>2. Architecture and State</h2>
+<h3>2.1 The Two Planes</h3>
+<p>osmRouter is partitioned into:</p>
+<ul>
+<li>$C$, the <strong>Control Plane</strong> — a single logical service holding authoritative state.</li>
+<li>$D = {d_1, d_2, \ldots, d_k}$, the <strong>Data Plane</strong> — a set of proxy nodes that read from $C$ via a fast cache and write back via an audited ingest API.</li>
+</ul>
+<p>The two planes share state only through:</p>
+<ol>
+<li><strong>Redis</strong> (the cache) — write-mostly by $C$, read-mostly by $D$.</li>
+<li><strong>HTTPS ingest</strong> — write-only by $D$, authenticated by a shared secret.</li>
+</ol>
+<h3>2.2 Persistent State (PostgreSQL, owned by $C$)</h3>
+<p>The authoritative state is the union of these relations.</p>
+<p><strong>Users.</strong> $\mathcal{U} = {u}$ where each $u = \langle \text{id}, \text{email}, h_p, r, p_{\text{id}}, t_v, m, c, u_t \rangle$:</p>
+<ul>
+<li>$\text{id} \in \mathbb{B}^{16}$ — UUIDv4</li>
+<li>$\text{email} \in \Sigma_\text{ascii}^{\leq 320}$ — case-insensitive, unique</li>
+<li>$h_p$ — Argon2id-encoded password hash</li>
+<li>$r \in {\text{user}, \text{admin}}$</li>
+<li>$p_\text{id}$ — foreign key into plans</li>
+<li>$t_v \in \mathbb{T} \cup {\bot}$ — <code>email_verified_at</code></li>
+<li>$m \in {0, 1}$ — <code>mfa_enabled</code></li>
+<li>$c \in \mathbb{T}$ — <code>created_at</code></li>
+<li>$u_t \in \mathbb{T}$ — <code>updated_at</code></li>
+</ul>
+<p><strong>RefreshTokens.</strong> $\mathcal{R} = {\rho}$ forming an arborescence: each $\rho = \langle \text{id}, u_\text{id}, h_\rho, \pi, t_i, t_e, t_r, \ldots\rangle$:</p>
+<ul>
+<li>$h_\rho = H(s_\rho)$ where $s_\rho \in \mathbb{B}^{32}$ is the plaintext token issued exactly once</li>
+<li>$\pi$ — <code>parent_id</code>, the token this one rotated from (or $\bot$ for first issue)</li>
+<li>$t_e$ — <code>expires_at</code>, $t_e = t_i + 30~\text{days}$ by default</li>
+<li>$t_r$ — <code>revoked_at</code> (or $\bot$)</li>
+</ul>
+<p><strong>EmailOTPs</strong>, <strong>Devices</strong>, <strong>DeviceCodes</strong>, <strong>Domains</strong>, <strong>Subdomains</strong>, <strong>Tunnels</strong>, <strong>AuditLogs</strong> — described in §6 onwards.</p>
+<h3>2.3 Volatile State (Redis, populated by $C$ and read by $D$)</h3>
+<p>The Redis store keeps the <strong>live mapping</strong> that the data plane consults on every visitor request:</p>
+<p>$$M : \Sigma_\text{host} \to \text{DeviceID}$$</p>
+<p>Keys are strings of the form <code>live:&lt;fqdn&gt;</code> for apex bindings or <code>live:&lt;prefix&gt;.&lt;fqdn&gt;</code> for subdomain bindings. Values are device IDs as UUIDv4 strings. There is no TTL — entries are explicitly removed when a binding is reset.</p>
+<p>Additional ephemeral keys:</p>
+<ul>
+<li><code>rl:&lt;class&gt;:&lt;actor&gt;</code> — token-bucket rate-limit counters, TTL equal to window</li>
+<li><code>tunnel:&lt;id&gt;</code> — (reserved for v1.1)</li>
+</ul>
+<h2>3. Cryptographic Primitives</h2>
+<h3>3.1 Password Hashing</h3>
+<p>Passwords are stored as the Argon2id PHC-encoded string:</p>
+<p>$$\text{store}(p) = \text{phc}\Big(\text{Argon2id}\big(p, s, \theta_\text{default}\big)\Big)$$</p>
+<p>with parameters $\theta_\text{default} = \langle m = 64,\text{MiB}, t = 3, p = 4, \text{keyLen} = 32, \text{saltLen} = 16\rangle$ and $s \overset{\$}\leftarrow \mathbb{B}^{16}$ on each call. Verification recomputes the key with the stored salt and parameters and compares the result in constant time.</p>
+<h3>3.2 Access Tokens (JWT)</h3>
+<p>Access tokens are signed JSON Web Tokens with header $\text{alg} = \texttt{HS256}$, $\text{typ} = \texttt{JWT}$. The payload is:</p>
+<pre><code class="language-json">{
+  &quot;sub&quot;: &quot;&lt;user_id&gt;&quot;,
+  &quot;role&quot;: &quot;user|admin&quot;,
+  &quot;scopes&quot;: [],
+  &quot;impersonated_by&quot;: &quot;&lt;admin_id&gt;&quot;,  // optional
+  &quot;iss&quot;: &quot;osmrouter&quot;,
+  &quot;aud&quot;: &quot;osmrouter-web&quot;,
+  &quot;iat&quot;: &lt;int&gt;, &quot;nbf&quot;: &lt;int&gt;, &quot;exp&quot;: &lt;int&gt;
+}
+</code></pre>
+<p>with $\text{exp} - \text{iat} = 15~\text{min}$ for regular access tokens and $10~\text{min}$ for impersonation tokens.</p>
+<p><strong>Verification.</strong> Any deserializer MUST:</p>
+<ol>
+<li>Reject tokens whose header advertises any algorithm other than <code>HS256</code>. In particular, <code>alg: none</code> MUST be rejected before the signature is even read.</li>
+<li>Verify the signature using the issuer&#39;s HMAC key $k_J \in \mathbb{B}^{\geq 32}$.</li>
+<li>Verify $\text{iat} \leq \text{now} \leq \text{exp}$ with a tolerance of zero (no clock skew allowance).</li>
+<li>Verify $\text{aud} = $ the verifier&#39;s audience identifier.</li>
+</ol>
+<h3>3.3 Refresh Tokens</h3>
+<p>Refresh tokens are URL-safe random byte strings of 32 bytes. The plaintext is sent to the client exactly once (in an <code>HttpOnly; Secure; SameSite=Lax</code> cookie). The server stores only $H(\text{token})$ in the <code>refresh_tokens</code> table.</p>
+<p>Each refresh token has a <code>parent_id</code> pointing to the token it rotated from, forming a forest. The <strong>chain</strong> of a refresh token is the transitive parent chain plus all its direct children.</p>
+<h3>3.4 OTP Codes</h3>
+<p>Email OTPs are 6 random decimal digits generated by rejection-sampling 8-bit values $v \in [0, 250)$ and mapping $v \bmod 10$. This eliminates modulo bias.</p>
+<p>The plaintext OTP is sent over email; only $H(\text{otp})$ is stored. Verification compares hashes in constant time. After 5 failed verification attempts the OTP is locked.</p>
+<h3>3.5 Domain Verification Token</h3>
+<p>The TXT verification token for domain $f$ owned by user $u$ is:</p>
+<p>$$\text{TXT}(u, f) = \texttt{osm-verify=} <del>|</del> \text{trunc}<em>{32}\big(\text{HMAC}</em>{k_\text{TXT}}(\texttt{dns-verify}~|<del>u</del>|~f)\big)$$</p>
+<p>where $k_\text{TXT} \in \mathbb{B}^{\geq 32}$ is the operator&#39;s verification secret. Without $k_\text{TXT}$ an attacker cannot construct a valid token for a domain — only the legitimate user, who got the token from the dashboard, can.</p>
+<h3>3.6 At-Rest Encryption (Registrar API Keys, etc.)</h3>
+<p>Sensitive fields in the database are encrypted with AES-256-GCM:</p>
+<p>$$c = \text{nonce} <del>|</del> \text{AES-GCM}_{k_E}(\text{nonce}, p), \quad \text{nonce} \overset{\$}\leftarrow \mathbb{B}^{12}$$</p>
+<p>The master key $k_E \in \mathbb{B}^{32}$ is loaded from the environment in v1; the v1.1 hardening migrates this to a KMS / HSM.</p>
+<h2>4. Identity &amp; Session Lifecycle</h2>
+<h3>4.1 Registration</h3>
+<p><code>POST /api/v1/auth/register {email, password, name?}</code>. The handler:</p>
+<ol>
+<li>Lowercase-and-trim the email; validate against RFC 5322 minimal grammar.</li>
+<li>Validate the password: length $\geq 8$, contains at least one digit. (Stronger rules are policy, not protocol.)</li>
+<li>Check uniqueness on <code>email</code>. Return <code>409 EMAIL_IN_USE</code> on conflict.</li>
+<li>Compute $h_p = \text{store}(\text{password})$.</li>
+<li>Insert $u$ with $t_v = \bot$.</li>
+<li>Generate $\text{otp} = $ 6 random digits; insert into <code>email_otps</code> with $H(\text{otp})$, <code>purpose = signup</code>, <code>expires_at = now + 10~min</code>.</li>
+<li>(Dev mode only) Echo $\text{otp}$ in the response body.</li>
+</ol>
+<p>Return 201 with ${u_\text{id}, \text{email}}$.</p>
+<h3>4.2 OTP Verification</h3>
+<p><code>POST /api/v1/auth/verify-otp {email, code}</code>. Handler:</p>
+<ol>
+<li>Find the most recent unexpired, unconsumed OTP for <code>email</code> with purpose <code>signup</code>.</li>
+<li>If <code>attempts &gt;= 5</code>, return <code>429 OTP_ATTEMPTS_EXCEEDED</code>.</li>
+<li>If $H(\text{code}) \neq H(\text{stored})$ (constant time): atomically increment <code>attempts</code>, return <code>400 OTP_INVALID</code>.</li>
+<li>Atomically <code>UPDATE email_otps SET consumed_at = now() WHERE id = ? AND consumed_at IS NULL</code> and verify exactly 1 row affected.</li>
+<li>If user&#39;s <code>email_verified_at</code> is null, set it to now.</li>
+<li>Issue session (§4.4).</li>
+</ol>
+<h3>4.3 Login</h3>
+<p><code>POST /api/v1/auth/login {email, password}</code>. Handler:</p>
+<ol>
+<li>Look up user by <code>email</code>.</li>
+<li><strong>Equal-time path</strong>: if user not found, perform a dummy Argon2id verify against a fixed encoded hash to equalise timing, then return <code>401 INVALID_CREDENTIALS</code>.</li>
+<li>Verify password with Argon2id. On mismatch return <code>401 INVALID_CREDENTIALS</code> with the <em>same</em> message and code as case 2 — error messages MUST NOT distinguish &quot;no such user&quot; from &quot;wrong password&quot;.</li>
+<li>If <code>email_verified_at = null</code>, return <code>403 EMAIL_NOT_VERIFIED</code>.</li>
+<li>Issue session (§4.4).</li>
+<li>Update <code>last_login_at</code>, <code>last_login_ip</code>.</li>
+<li>Write audit log <code>user.logged_in</code>.</li>
+</ol>
+<h3>4.4 Issuing a Session</h3>
+<p>To issue a session for user $u$ with optional parent refresh token $\rho_\pi$:</p>
+<ol>
+<li>Mint access JWT $A$ (§3.2) with <code>exp = now + 15 min</code>.</li>
+<li>Generate plaintext refresh $s_\rho \overset{\$}\leftarrow \mathbb{B}^{32}$ (URL-safe base64).</li>
+<li>Insert refresh row: $\langle h_\rho = H(s_\rho), u_\text{id}, \pi = \rho_\pi, t_i = \text{now}, t_e = \text{now} + 30~\text{days}\rangle$.</li>
+<li>Set cookies:<ul>
+<li><code>osm_access = A</code> with <code>HttpOnly; Secure; SameSite=Lax; Path=/; Max-Age=900</code></li>
+<li><code>osm_refresh = s_\rho</code> with same flags but <code>Max-Age=2592000</code>.</li>
+</ul>
+</li>
+</ol>
+<h3>4.5 Refresh and Reuse Detection</h3>
+<p><code>POST /api/v1/auth/refresh</code>. Handler reads $s_\rho$ from <code>osm_refresh</code>. Algorithm:</p>
+<pre><code>ρ ← refresh_tokens WHERE token_hash = H(s_ρ)
+if ρ is null OR now &gt; ρ.expires_at OR ρ.revoked_at is not null:
+    # REUSE OR EXPIRY OR REVOCATION
+    if ρ exists:
+        revoke_chain(ρ.user_id, ρ)
+        audit(action=&quot;auth.refresh_reuse_detected&quot;, actor=ρ.user_id, ...)
+    return 401 UNAUTHORIZED
+mark ρ.revoked_at ← now
+new_session ← issue_session(ρ.user_id, parent_id=ρ.id)
+return 204
+</code></pre>
+<p><strong>Theorem (Chain Revocation).</strong> <em>If an attacker captures a refresh token $\rho$, uses it once successfully (rotating to $\rho&#39;$), and later the legitimate user presents $\rho$ again, then the entire chain of $\rho$ — every $\rho^{(i)}$ reachable by ancestors-or-descendants — is revoked, including the attacker&#39;s $\rho&#39;$.</em></p>
+<p><strong>Proof sketch.</strong> On the legitimate user&#39;s reuse of $\rho$, the row exists (we never delete on reuse, only revoke). It has <code>revoked_at != null</code> (from the attacker&#39;s successful refresh). The handler enters the &quot;REUSE OR EXPIRY&quot; branch and calls <code>revoke_chain</code>, which sets <code>revoked_at = now()</code> on every refresh token for that user where <code>revoked_at IS NULL</code>. After this, any future request — by the attacker or the legitimate user — that presents any descendant of $\rho$ will land in the same branch. $\square$</p>
+<h3>4.6 Logout</h3>
+<p><code>POST /api/v1/auth/logout</code>. Handler: reads $s_\rho$, revokes the chain, clears both cookies via <code>Max-Age=-1</code>.</p>
+<h2>5. CSRF and Rate Limiting</h2>
+<h3>5.1 CSRF (Cross-Site Request Forgery)</h3>
+<p><code>GET /api/v1/csrf</code> returns ${ \text{csrf_token} }$ and <code>Set-Cookie: osm_csrf=&lt;token&gt;; SameSite=Lax</code>. The token is 32 random bytes, URL-safe base64.</p>
+<p>For any request with method $\in {\text{POST}, \text{PUT}, \text{PATCH}, \text{DELETE}}$ to an authenticated route:</p>
+<ol>
+<li>If the request has <code>Authorization: Bearer ...</code>, skip CSRF (machine clients).</li>
+<li>Else: require the request to carry both <code>osm_csrf</code> cookie <em>and</em> <code>X-CSRF-Token</code> header, with values matching in constant time.</li>
+<li>Otherwise, return <code>403 CSRF_INVALID</code>.</li>
+</ol>
+<h3>5.2 Rate Limit (Token Bucket)</h3>
+<p>Each rate-limit class has parameters $(C, R)$ where $C$ is bucket capacity and $R$ is the steady-state refill rate (tokens per second). Each request consumes one token; if none available, the request is rejected with <code>429 TOO_MANY_REQUESTS</code> and the response carries <code>Retry-After: ⌈1/R⌉</code> seconds.</p>
+<p>The default classes:</p>
+<table>
+<thead>
+<tr>
+<th>Class</th>
+<th>Key</th>
+<th>$C$</th>
+<th>$R$</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>auth</td>
+<td><code>ip:&lt;remote&gt;</code></td>
+<td>5</td>
+<td>$5/60$</td>
+</tr>
+<tr>
+<td>normal</td>
+<td><code>u:&lt;user_id&gt;</code></td>
+<td>100</td>
+<td>$100/60$</td>
+</tr>
+</tbody></table>
+<p>The implementation uses a leaky token bucket with continuous refill: at each request, $\text{tokens} \leftarrow \min(C, \text{tokens} + (\text{now} - \text{last}) \cdot R)$.</p>
+<h2>6. Domains and Subdomains</h2>
+<h3>6.1 FQDN Validation</h3>
+<p>A label is valid iff it matches $<a href="?:%5Ba-z0-9%5Ctext%7B-%7D%5D%5E%7B0..61%7D%5Ba-z0-9%5D">a-z0-9</a>?$. A TLD is a final label matching $[a-z]^{\geq 2}$. An FQDN is one or more labels followed by a TLD, total length $\leq 253$. Case is normalised by lowercasing on ingress.</p>
+<h3>6.2 Domain Lifecycle</h3>
+<p>When a user creates a domain $f$:</p>
+<ol>
+<li>Validate $f$ (§6.1).</li>
+<li>Check uniqueness on <code>fqdn</code>. Conflicts return <code>409 DOMAIN_EXISTS</code>.</li>
+<li>Enforce plan limit (count of user&#39;s domains &lt; <code>plan.max_domains</code>).</li>
+<li>Generate $\text{CNAME} = $ the operator&#39;s configured proxy target, $\text{TXT} = \text{TXT}(u, f)$ (§3.5).</li>
+<li>Insert with <code>dns_status = pending</code>.</li>
+<li>Enqueue verification.</li>
+</ol>
+<h3>6.3 DNS Verifier (Worker Loop)</h3>
+<p>The verifier maintains a queue of <code>domain_id</code>s. Periodically, every 60 seconds, plus on every enqueue, it drains the queue. For each domain:</p>
+<ol>
+<li><code>UPDATE domains SET dns_status=&#39;verifying&#39;, verification_attempted_at=now() WHERE id=? AND dns_status IN (&#39;pending&#39;,&#39;failed&#39;) RETURNING *;</code></li>
+<li>Look up CNAME for $f$ via the configured resolver. If it matches the operator&#39;s target string (case-insensitive, dots-trimmed), continue; else go to step 4.</li>
+<li>Look up TXT for $\texttt{_osm.}f$. If any returned string equals $\text{TXT}(u, f)$, mark verified.</li>
+<li>If we did not mark verified, look up TXT for $f$ directly. If any match, mark verified. Else mark failed.</li>
+</ol>
+<p>When marking verified, also publish <code>domain.verified</code> to the user&#39;s WebSocket channel.</p>
+<h3>6.4 Subdomains and Binding</h3>
+<p>A subdomain is $\sigma = \langle \text{id}, f_\text{id}, p, \text{port}, d_\text{bound} \rangle$ where $p \in \Sigma$ is a label or the empty string (apex), and $d_\text{bound}$ is a <code>device_id</code> or null.</p>
+<p><strong>Bind algorithm:</strong></p>
+<pre><code>input: (user_id, subdomain_id, target_device_id)
+
+sd ← subdomains WHERE id = subdomain_id
+domain ← domains WHERE id = sd.parent_domain_id AND user_id = user_id
+if domain is null:
+    return SUBDOMAIN_NOT_FOUND  // do not leak existence
+
+device ← devices WHERE id = target_device_id AND user_id = user_id AND revoked_at IS NULL
+if device is null:                              return DEVICE_NOT_OWNED
+if device.last_seen_at older than 5 minutes:    return DEVICE_OFFLINE
+
+BEGIN TRANSACTION
+    UPDATE subdomains SET bound_device_id=device.id, bound_at=now() WHERE id=sd.id
+    REDIS SET key=liveMapKey(domain.fqdn, sd.prefix), value=device.id, no_ttl
+    if redis SET fails: ROLLBACK; return INTERNAL_ERROR
+COMMIT
+
+publish_ws(user_id, &quot;subdomain.bound&quot;, {...})
+audit(&quot;subdomain.bound&quot;, actor=user_id, target=sd.id, ...)
+</code></pre>
+<p>The composite Redis key is:</p>
+<p>$$\text{liveMapKey}(f, p) = \begin{cases} \texttt{live:} <del>|</del> f &amp; p = \varepsilon \ \texttt{live:} <del>|</del> p <del>|</del> \texttt{.} <del>|</del> f &amp; \text{otherwise} \end{cases}$$</p>
+<p><strong>Unbind</strong> clears <code>bound_device_id</code>, deletes the Redis key, and publishes <code>subdomain.unbound</code>. If a tunnel is currently live on the previous device, it remains open until the visitor&#39;s request times out or the proxy receives the next routing miss.</p>
+<h2>7. The Tunnel Wire Protocol</h2>
+<h3>7.1 Transport</h3>
+<p>Tunnels are WebSocket connections from the desktop client to the proxy node. Each frame is one text-mode WebSocket message carrying one JSON object. Maximum WebSocket payload size: $2^{23}$ bytes (8 MiB) — but the protocol&#39;s logical body cap is 4 MiB (§7.4).</p>
+<h3>7.2 Frame Schema</h3>
+<p>Every frame conforms to:</p>
+<pre><code class="language-json">{
+  &quot;type&quot;: &quot;&lt;FrameType&gt;&quot;,
+  &quot;stream_id&quot;: &quot;&lt;UUIDv4&gt;&quot;,   // optional, present iff type is per-stream
+  ...                        // per-type fields
+}
+</code></pre>
+<p>Frame types and required fields:</p>
+<table>
+<thead>
+<tr>
+<th><code>type</code></th>
+<th>Direction</th>
+<th>Required fields</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>hello</code></td>
+<td>client → proxy</td>
+<td><code>device_id</code>, <code>api_key</code>, <code>version</code></td>
+</tr>
+<tr>
+<td><code>hello_ack</code></td>
+<td>proxy → client</td>
+<td><code>node_id</code></td>
+</tr>
+<tr>
+<td><code>request</code></td>
+<td>proxy → client</td>
+<td><code>stream_id</code>, <code>method</code>, <code>url</code>, <code>headers</code>, <code>body_b64?</code></td>
+</tr>
+<tr>
+<td><code>response</code></td>
+<td>client → proxy</td>
+<td><code>stream_id</code>, <code>status</code>, <code>headers?</code>, <code>body_b64?</code></td>
+</tr>
+<tr>
+<td><code>error</code></td>
+<td>either</td>
+<td><code>code</code>, <code>message</code>, <code>stream_id?</code></td>
+</tr>
+<tr>
+<td><code>ping</code></td>
+<td>either</td>
+<td>—</td>
+</tr>
+<tr>
+<td><code>pong</code></td>
+<td>either</td>
+<td>—</td>
+</tr>
+<tr>
+<td><code>close</code></td>
+<td>proxy → client</td>
+<td><code>stream_id?</code>, <code>code</code>, <code>message?</code></td>
+</tr>
+</tbody></table>
+<p><code>body_b64</code> is the base64-std-padding encoding of the request or response body.</p>
+<h3>7.3 Connection Lifecycle</h3>
+<ol>
+<li>Client opens WSS connection to <code>&lt;proxy&gt;/ws/tunnel</code>.</li>
+<li>Within 5 seconds, client MUST send a <code>hello</code> frame. Failure → proxy sends <code>error{code: BAD_HELLO}</code> and closes.</li>
+<li>Proxy POSTs <code>/api/v1/proxy/devices/verify</code> to Control Plane with ${\text{api_key}}$. The Control Plane returns ${ \text{valid}, \text{device_id}, \text{user_id}, \text{name} }$.</li>
+<li>If invalid, proxy sends <code>error{code: UNAUTHORIZED}</code> and closes.</li>
+<li>If valid, proxy registers the tunnel in its hub. If a tunnel for this <code>device_id</code> already exists, the old one is sent <code>close{code: replaced}</code> and dropped first.</li>
+<li>Proxy sends <code>hello_ack{node_id}</code>.</li>
+<li>Connection remains open until either side closes or 70 s elapse without traffic in either direction.</li>
+</ol>
+<p>WebSocket PING is sent by the proxy every 30 s. The client MUST respond with PONG. Application-level <code>ping</code> / <code>pong</code> frames are also accepted, sent at 60 s cadence, as defence-in-depth against intermediaries that drop WS-level pings.</p>
+<h3>7.4 Request / Response Pairing</h3>
+<p>When a visitor request arrives at the proxy:</p>
+<ol>
+<li>Allocate <code>stream_id = UUIDv4()</code>.</li>
+<li>Atomically register the stream in the proxy&#39;s stream registry, associated with a buffered channel.</li>
+<li>Read the visitor&#39;s body bounded by 4 MiB. If exceeded, return <code>413 PAYLOAD_TOO_LARGE</code> to the visitor immediately, without forwarding.</li>
+<li>Construct a <code>request</code> frame:<pre><code class="language-json">{
+  &quot;type&quot;: &quot;request&quot;,
+  &quot;stream_id&quot;: &quot;&lt;id&gt;&quot;,
+  &quot;method&quot;: &quot;&lt;method&gt;&quot;,
+  &quot;url&quot;: &quot;&lt;request-uri&gt;&quot;,
+  &quot;headers&quot;: { &quot;X-Forwarded-For&quot;: [&quot;&lt;visitor IP&gt;&quot;], &quot;X-Real-IP&quot;: [&quot;&lt;visitor IP&gt;&quot;], ... },
+  &quot;body_b64&quot;: &quot;&lt;base64 body&gt;&quot;
+}
+</code></pre>
+</li>
+<li>Send over the tunnel.</li>
+<li>Await the matching <code>response</code> frame on the stream channel, with a deadline of 30 s.</li>
+<li>On <code>response</code>: write headers, status, body to the visitor.</li>
+<li>On <code>error</code> for the same <code>stream_id</code>: write <code>502 Bad Gateway</code> with the error&#39;s <code>message</code> to the visitor.</li>
+<li>On timeout: write <code>504 Gateway Timeout</code>.</li>
+<li>Always: deregister the stream from the registry.</li>
+</ol>
+<p><strong>Header sanitization.</strong> Before forwarding, the proxy:</p>
+<ul>
+<li>Removes hop-by-hop headers: <code>Connection</code>, <code>Keep-Alive</code>, <code>Proxy-Authenticate</code>, <code>Proxy-Authorization</code>, <code>Te</code>, <code>Trailers</code>, <code>Transfer-Encoding</code>, <code>Upgrade</code>.</li>
+<li>Overwrites <code>X-Forwarded-For</code>, <code>X-Real-IP</code> with the visitor&#39;s remote address — never trusts what arrives on the wire for these.</li>
+<li>Sets <code>X-Forwarded-Proto</code> to <code>http</code> (v1) or <code>https</code> if behind a TLS terminator.</li>
+</ul>
+<h3>7.5 Holding State</h3>
+<p>If a visitor request arrives for a host whose <code>live:&lt;host&gt;</code> mapping points to a device whose tunnel is not currently registered in the proxy&#39;s hub:</p>
+<ul>
+<li>Return <code>503 Service Unavailable</code> with a static HTML page indicating &quot;Reconnecting…&quot;. The page sets <code>Retry-After: 10</code>.</li>
+<li>Do NOT read the request body before deciding — it&#39;s wasted bandwidth otherwise.</li>
+</ul>
+<p>This is the v1 holding state. v1.1 will add mid-stream splice: when a client reconnects within the grace window, in-flight visitor sockets are spliced into the new tunnel.</p>
+<h3>7.6 Proxy Node ↔ Control Plane Ingest</h3>
+<p>All proxy → Control Plane traffic carries <code>Authorization: Bearer &lt;shared_secret&gt;</code> and goes to the <code>/api/v1/proxy/*</code> routes:</p>
+<table>
+<thead>
+<tr>
+<th>Endpoint</th>
+<th>Method</th>
+<th>Body</th>
+<th>Effect</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>/proxy/devices/verify</code></td>
+<td>POST</td>
+<td><code>{api_key}</code></td>
+<td>Validates api_key, returns device/user identity</td>
+</tr>
+<tr>
+<td><code>/proxy/tunnels/start</code></td>
+<td>POST</td>
+<td><code>{device_id, host, node_id}</code></td>
+<td>Creates a <code>tunnels</code> row, returns <code>{tunnel_id}</code></td>
+</tr>
+<tr>
+<td><code>/proxy/tunnels/:id/end</code></td>
+<td>POST</td>
+<td><code>{bytes_transferred}</code></td>
+<td>Closes the tunnel row</td>
+</tr>
+<tr>
+<td><code>/proxy/nodes/heartbeat</code></td>
+<td>POST</td>
+<td><code>{node_id, tunnels}</code></td>
+<td>Liveness signal</td>
+</tr>
+</tbody></table>
+<p>The shared secret is compared in constant time. In v1.1 this becomes per-node mTLS or per-node Bearer.</p>
+<h2>8. Failure Modes (Conformance Reference)</h2>
+<p>A conformant implementation MUST behave as specified in this matrix.</p>
+<table>
+<thead>
+<tr>
+<th>Condition</th>
+<th>Visitor sees</th>
+<th>Operator sees</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>No <code>live:&lt;host&gt;</code> mapping</td>
+<td><code>502</code> w/ &quot;no route&quot; page</td>
+<td>Audit log: nothing; logs note the miss</td>
+</tr>
+<tr>
+<td>Mapping exists, no tunnel in hub</td>
+<td><code>503</code> w/ &quot;Reconnecting…&quot; page, <code>Retry-After: 10</code></td>
+<td><code>device.offline</code> event eventually</td>
+</tr>
+<tr>
+<td>Tunnel send buffer full &gt; 5 s</td>
+<td><code>502</code> from <code>tunnel: send buffer full</code></td>
+<td>Tunnel closed by writePump; metric increment</td>
+</tr>
+<tr>
+<td><code>response</code> not received within 30 s</td>
+<td><code>504</code></td>
+<td>Stream cleanup; metric increment</td>
+</tr>
+<tr>
+<td>Local app down (client reports error)</td>
+<td><code>502</code> with the <code>error.message</code> from the client</td>
+<td><code>error</code> frame written to per-tunnel log</td>
+</tr>
+<tr>
+<td>Client api_key revoked between connect &amp; next request</td>
+<td>The active session continues (auth is one-shot at connect). Revoke takes effect on next reconnect.</td>
+<td><code>device.revoked</code> audit entry; the proxy may also be ordered to drop active tunnels in v1.1</td>
+</tr>
+<tr>
+<td>Request body &gt; 4 MiB</td>
+<td><code>413</code> from proxy; body discarded; nothing sent down tunnel</td>
+<td>Nothing</td>
+</tr>
+<tr>
+<td>Two <code>hello</code>s from same <code>device_id</code></td>
+<td>The earlier client gets <code>close{code: replaced}</code>; the later one wins</td>
+<td>Audit <code>tunnel.replaced</code> (v1.1)</td>
+</tr>
+<tr>
+<td>Control Plane unreachable</td>
+<td>Existing tunnels continue routing. New tunnel connects fail at <code>hello</code> verify.</td>
+<td>Proxy logs <code>verify: 503</code>; metrics show ingest failures</td>
+</tr>
+<tr>
+<td>Redis unreachable</td>
+<td>All visitor requests get <code>502</code> (lookup fails). Tunnels stay registered in the hub.</td>
+<td>Logs note Redis ping failures; periodic retry</td>
+</tr>
+</tbody></table>
+<h2>9. Security Properties (Formal)</h2>
+<p>Let $\mathcal{A}$ be a probabilistic polynomial-time adversary.</p>
+<p><strong>P1 — Password indistinguishability under DB compromise.</strong>
+If $\mathcal{A}$ obtains a snapshot of $\mathcal{U}$, recovering a password $p$ given its stored $h_p$ requires expected time $\Omega(2^{n_p})$ for an $n_p$-bit password, modulated by Argon2id cost. With $\theta_\text{default}$, a single guess on commodity hardware (2026) is bounded below by $\approx 250~\text{ms}$, making mass dictionary attacks economically inefficient.</p>
+<p><strong>P2 — JWT unforgeability.</strong>
+Given the public knowledge of the protocol but not $k_J$, $\mathcal{A}$&#39;s probability of producing a token that the verifier accepts is bounded by HMAC-SHA-256&#39;s existential-unforgeability bound for $\mathcal{A}$&#39;s queries.</p>
+<p><strong>P3 — Refresh-token reuse triggers cascade.</strong>
+For any history in which a refresh token $\rho$ is presented twice with at least one intervening successful rotation, every refresh token in the chain of $\rho$ has $\text{revoked_at} \neq \bot$ after the second presentation. (Proof in §4.5.)</p>
+<p><strong>P4 — Domain-verification unforgeability.</strong>
+$\mathcal{A}$ without $k_\text{TXT}$ cannot produce $\text{TXT}(u, f)$ for any choice of $(u, f)$ with probability better than negligible in $|k_\text{TXT}|$, by HMAC-SHA-256 EUF.</p>
+<p><strong>P5 — Cross-user data isolation.</strong>
+Every Control Plane SELECT/UPDATE/DELETE against user-scoped relations includes a <code>user_id = ?</code> predicate in the WHERE clause. No path through the API permits a user $u$ to read or modify any row where <code>user_id \neq u</code>. Verified by integration test <code>TestIntegration_DomainOwnership_ForbidsCrossUserAccess</code>.</p>
+<p><strong>P6 — Algorithm-confusion immunity.</strong>
+The JWT parser&#39;s first step is asserting <code>tok.Method == jwt.SigningMethodHS256</code>. Tokens with <code>alg: none</code>, <code>alg: RS256</code>, or any other are rejected before signature verification. Verified by <code>TestJWT_AlgNone_Rejected</code>.</p>
+<p><strong>P7 — CSRF protection on writes.</strong>
+For browser-mediated POST/PUT/PATCH/DELETE requests to authenticated routes, both <code>osm_csrf</code> cookie AND <code>X-CSRF-Token</code> header are required; constant-time comparison ensures presence-mismatch and value-mismatch both yield <code>403</code>. Verified by <code>TestSecurity_CSRF_*</code>.</p>
+<p><strong>P8 — Login does not leak account existence.</strong>
+For any login request, the response when &quot;no such user&quot; is byte-identical to the response when &quot;wrong password&quot;, and the timing distributions are equalised by an artificial Argon2id verify in the no-user branch.</p>
+<p><strong>P9 — Audit append-only at the application layer.</strong>
+The audit-writer module has no function that issues <code>UPDATE</code> or <code>DELETE</code> against <code>audit_logs</code>. At the DB level, the application role&#39;s grants on <code>audit_logs</code> are restricted to <code>INSERT</code> and <code>SELECT</code>. (Enforcement is operator-configurable; the application code never expects to mutate audit rows.)</p>
+<h2>10. Performance Bounds</h2>
+<p>These are observed bounds from the reference implementation on commodity hardware (Apple M4 Max, 64 GiB RAM, 2026); they&#39;re not protocol guarantees, but they&#39;re useful for sizing.</p>
+<table>
+<thead>
+<tr>
+<th>Operation</th>
+<th>Bound (median)</th>
+<th>Note</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>Argon2id hash (default params)</td>
+<td>200–500 ms</td>
+<td>Set so a single guess is expensive</td>
+</tr>
+<tr>
+<td>JWT sign + parse</td>
+<td>&lt; 0.5 ms</td>
+<td>HS256 is fast</td>
+</tr>
+<tr>
+<td>Redis lookup (live mapping)</td>
+<td>&lt; 1 ms</td>
+<td>Hot data</td>
+</tr>
+<tr>
+<td>Tunnel forwarding (small bodies)</td>
+<td>5–20 ms</td>
+<td>Browser → proxy → tunnel → local app → back</td>
+</tr>
+<tr>
+<td>WS reconnect after drop</td>
+<td>1–5 s</td>
+<td>Exponential backoff, capped at 30 s</td>
+</tr>
+</tbody></table>
+<h2>11. Conformance Checklist</h2>
+<p>To call an implementation &quot;osmRouter-compatible&quot;, the following MUST hold:</p>
+<ul>
+<li><input disabled="" type="checkbox"> Argon2id with $\theta_\text{default}$ for password hashing.</li>
+<li><input disabled="" type="checkbox"> JWT HS256 with explicit alg allowlist.</li>
+<li><input disabled="" type="checkbox"> Refresh-token rotation with reuse-cascade revoke.</li>
+<li><input disabled="" type="checkbox"> Identical login response shape for no-user vs wrong-password.</li>
+<li><input disabled="" type="checkbox"> OTP: 6 digits via rejection sampling; hashed at rest; attempt-counter; constant-time compare.</li>
+<li><input disabled="" type="checkbox"> CSRF double-submit on all browser writes.</li>
+<li><input disabled="" type="checkbox"> Per-actor rate limit with token bucket and <code>Retry-After</code> header.</li>
+<li><input disabled="" type="checkbox"> FQDN validation matching §6.1.</li>
+<li><input disabled="" type="checkbox"> HMAC TXT token matching §3.5.</li>
+<li><input disabled="" type="checkbox"> Tunnel frame format from §7.2.</li>
+<li><input disabled="" type="checkbox"> <code>request</code> / <code>response</code> pairing via per-stream <code>stream_id</code>.</li>
+<li><input disabled="" type="checkbox"> Holding-state <code>503</code> with <code>Reconnecting…</code> page for hub-miss-on-mapped-host.</li>
+<li><input disabled="" type="checkbox"> Append-only audit log row on every destructive action.</li>
+<li><input disabled="" type="checkbox"> All HTTPS responses include <code>X-Content-Type-Options: nosniff</code>, <code>X-Frame-Options: DENY</code>, strict CSP.</li>
+</ul>
+<h2>12. Versioning</h2>
+<p>This is <strong>Yellow Paper v1.0</strong>. The wire-protocol version (sent in <code>hello.version</code>) is <code>&quot;1&quot;</code>. Backward-incompatible changes increment the major version; the proxy MUST reject <code>hello</code> frames whose major version does not match what it speaks, by sending <code>error{code: VERSION_INCOMPATIBLE}</code>.</p>
+<hr>
+<h2>Appendix A — Reference Implementation Cross-Index</h2>
+<table>
+<thead>
+<tr>
+<th>§</th>
+<th>Reference implementation locator</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>2.2</td>
+<td><code>server/internal/models/models.go</code></td>
+</tr>
+<tr>
+<td>3.1</td>
+<td><code>server/internal/platform/crypto/argon2.go</code></td>
+</tr>
+<tr>
+<td>3.2</td>
+<td><code>server/internal/platform/crypto/jwt.go</code></td>
+</tr>
+<tr>
+<td>3.5</td>
+<td><code>server/internal/platform/crypto/random.go</code> (<code>DomainVerifyToken</code>)</td>
+</tr>
+<tr>
+<td>3.6</td>
+<td><code>server/internal/platform/crypto/aes.go</code></td>
+</tr>
+<tr>
+<td>4.x</td>
+<td><code>server/internal/auth/service.go</code></td>
+</tr>
+<tr>
+<td>5.1</td>
+<td><code>server/internal/platform/csrf/csrf.go</code></td>
+</tr>
+<tr>
+<td>5.2</td>
+<td><code>server/internal/platform/ratelimit/ratelimit.go</code></td>
+</tr>
+<tr>
+<td>6.x</td>
+<td><code>server/internal/domains/</code>, <code>server/internal/subdomains/</code></td>
+</tr>
+<tr>
+<td>7.2</td>
+<td><code>proxy-node/internal/tunnel/frame.go</code> (canonical), <code>tunnel-client/internal/tunnel/frame.go</code> (mirror)</td>
+</tr>
+<tr>
+<td>7.3</td>
+<td><code>proxy-node/cmd/proxy/main.go</code> (<code>makeTunnelHandler</code>)</td>
+</tr>
+<tr>
+<td>7.4</td>
+<td><code>proxy-node/internal/router/router.go</code></td>
+</tr>
+<tr>
+<td>8</td>
+<td><code>proxy-node/internal/router/router.go</code>, <code>tunnel-client/internal/forwarder/forwarder.go</code></td>
+</tr>
+</tbody></table>
+<hr>
+<p><em>The companion narrative is in the <a href="../Whitepaper/osmRouter-Whitepaper.md">Whitepaper</a>. The complete reference implementation, full test suite, and Obsidian vault of design decisions live in this repository.</em></p>
+
+<div class="footer">
+  Source: the markdown sibling of this file in the same folder.
+  Reference implementation: <code>github.com/osmrouter</code> (in this repository).
+</div>
+</main>
+<script>
+function toggleTheme() {
+  const r = document.documentElement;
+  const next = r.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
+  r.setAttribute('data-theme', next);
+  try { localStorage.setItem('osm-paper-theme', next); } catch (e) {}
+}
+(function() {
+  try {
+    const t = localStorage.getItem('osm-paper-theme');
+    if (t) document.documentElement.setAttribute('data-theme', t);
+  } catch (e) {}
+})();
+</script>
+</body>
+</html>

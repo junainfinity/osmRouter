@@ -1,0 +1,20 @@
+{
+  "extends": "../../tsconfig.base.json",
+  "compilerOptions": {
+    "noEmit": true,
+    "baseUrl": ".",
+    "paths": {
+      "@osmrouter/shared": ["../../packages/shared/src/index.ts"],
+      "@osmrouter/shared/*": ["../../packages/shared/src/*"],
+      "@/*": ["./renderer/*"]
+    }
+  },
+  "include": [
+    "main/**/*",
+    "preload/**/*",
+    "renderer/**/*",
+    "tests/**/*",
+    "scripts/**/*",
+    "../../packages/shared/src/**/*"
+  ]
+}

@@ -1,0 +1,35 @@
+# Build + run the Next.js 16 dashboard. Build context: the project root.
+FROM node:22-alpine AS deps
+RUN apk add --no-cache libc6-compat
+WORKDIR /app
+COPY web/package.json web/pnpm-lock.yaml* web/package-lock.json* web/yarn.lock* ./
+# pnpm 10 fails with ERR_PNPM_IGNORED_BUILDS on optional native deps (sharp,
+# unrs-resolver). --ignore-scripts skips those build hooks; Next.js falls back
+# to JS-based image optimization, which is fine for a dev/demo container.
+RUN corepack enable && pnpm install --ignore-scripts
+
+FROM node:22-alpine AS builder
+WORKDIR /app
+# Build-time env: NEXT_PUBLIC_* vars are baked into the client bundle here, so
+# the value must be present BEFORE `next build` runs. docker-compose passes
+# this via the `args:` block on the web service.
+ARG NEXT_PUBLIC_API_BASE
+ENV NEXT_PUBLIC_API_BASE=$NEXT_PUBLIC_API_BASE
+COPY --from=deps /app/node_modules ./node_modules
+COPY web/ ./
+ENV NEXT_TELEMETRY_DISABLED=1 CI=true
+# Use the local next binary directly — going through pnpm would trigger a
+# modules-status check that fails because we installed with --ignore-scripts.
+RUN node_modules/.bin/next build
+
+FROM node:22-alpine AS runner
+WORKDIR /app
+ENV NODE_ENV=production \
+    NEXT_TELEMETRY_DISABLED=1 \
+    PORT=3000 \
+    HOSTNAME=0.0.0.0
+RUN addgroup -S osm && adduser -S osm -G osm
+COPY --from=builder --chown=osm:osm /app ./
+USER osm
+EXPOSE 3000
+CMD ["sh", "-c", "node_modules/.bin/next start -p 3000 -H 0.0.0.0"]

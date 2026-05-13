@@ -1,0 +1,330 @@
+<!doctype html>
+<html lang="en" data-theme="dark">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>osmRouter V2 — Deployment Guide</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;450;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root {
+  --accent: oklch(72% 0.16 252);
+  --accent-soft: oklch(72% 0.16 252 / 0.14);
+  --accent-line: oklch(72% 0.16 252 / 0.35);
+  --bg: #08090b; --bg-panel: #0e0f12; --bg-soft: #131418; --bg-sunken: #1a1c20;
+  --border: #1f2127; --border-strong: #2a2d34;
+  --text: #f4f4f3; --text-muted: #9a9da4; --text-faint: #5f6168;
+  --success: oklch(64% 0.15 152); --danger: oklch(60% 0.21 25);
+  --font-sans: 'Inter', -apple-system, BlinkMacSystemFont, system-ui, sans-serif;
+  --font-mono: 'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, monospace;
+}
+@media (prefers-color-scheme: light) {
+  :root[data-theme="dark"] { } /* keep dark by default; toggle below switches */
+}
+* { box-sizing: border-box; }
+html, body { margin: 0; padding: 0; }
+body {
+  background: var(--bg); color: var(--text);
+  font-family: var(--font-sans); font-size: 15px; line-height: 1.6;
+  -webkit-font-smoothing: antialiased; text-rendering: optimizeLegibility;
+}
+.wrap { max-width: 760px; margin: 0 auto; padding: 56px 32px 96px; }
+.eyebrow {
+  font-family: var(--font-mono); font-size: 11.5px; letter-spacing: 0.08em;
+  text-transform: uppercase; color: var(--accent); margin-bottom: 8px;
+}
+h1 { font-size: 40px; font-weight: 600; letter-spacing: -0.025em; line-height: 1.1; margin: 0 0 14px; }
+h1 + p { color: var(--text-muted); font-size: 18px; margin: 0 0 8px; }
+h1 + p + p { color: var(--text-faint); font-style: italic; font-size: 13px; margin: 4px 0 56px; }
+h2 {
+  font-size: 22px; font-weight: 600; letter-spacing: -0.015em;
+  margin: 56px 0 14px; padding-top: 24px; border-top: 1px solid var(--border);
+}
+h3 { font-size: 17px; font-weight: 600; margin: 32px 0 10px; }
+h4 { font-size: 15px; font-weight: 600; margin: 24px 0 8px; }
+p, ul, ol, blockquote { margin: 0 0 16px; }
+a { color: var(--accent); text-decoration: none; border-bottom: 1px dotted var(--accent-line); }
+a:hover { border-bottom-style: solid; }
+strong { font-weight: 600; color: var(--text); }
+em { font-style: italic; color: var(--text-muted); }
+code {
+  font-family: var(--font-mono); font-size: 0.88em;
+  background: var(--bg-soft); border: 1px solid var(--border); border-radius: 4px;
+  padding: 1px 6px;
+}
+pre {
+  font-family: var(--font-mono); font-size: 12.5px; line-height: 1.55;
+  background: var(--bg-sunken); border: 1px solid var(--border); border-radius: 10px;
+  padding: 16px 20px; overflow-x: auto;
+  box-shadow: 0 1px 0 rgba(0,0,0,0.4);
+  margin: 0 0 24px;
+}
+pre code { background: transparent; border: 0; padding: 0; font-size: inherit; color: var(--text); }
+blockquote {
+  border-left: 2px solid var(--accent-line);
+  background: var(--accent-soft);
+  padding: 12px 16px; border-radius: 0 8px 8px 0;
+  color: var(--text); font-style: normal;
+}
+hr { border: 0; border-top: 1px solid var(--border); margin: 48px 0; }
+ul, ol { padding-left: 22px; }
+li { margin: 6px 0; }
+table {
+  width: 100%; border-collapse: collapse; margin: 0 0 24px;
+  font-size: 13.5px; background: var(--bg-panel); border: 1px solid var(--border); border-radius: 10px;
+  overflow: hidden;
+}
+th, td { padding: 10px 14px; border-bottom: 1px solid var(--border); text-align: left; vertical-align: top; }
+th { font-family: var(--font-mono); font-size: 11.5px; text-transform: uppercase; letter-spacing: 0.06em; color: var(--text-muted); background: var(--bg); }
+tbody tr:last-child td { border-bottom: 0; }
+tbody tr:hover { background: var(--bg-soft); }
+.theme-toggle {
+  position: fixed; top: 16px; right: 20px; z-index: 10;
+  display: inline-flex; gap: 6px; padding: 4px 10px;
+  font-family: var(--font-mono); font-size: 11.5px; color: var(--text-muted);
+  background: var(--bg-panel); border: 1px solid var(--border); border-radius: 999px;
+  cursor: pointer;
+}
+.theme-toggle:hover { color: var(--text); border-color: var(--border-strong); }
+:root[data-theme="light"] {
+  --bg: #fafaf9; --bg-panel: #ffffff; --bg-soft: #f4f4f3; --bg-sunken: #ededec;
+  --border: #e7e7e5; --border-strong: #d4d4d2;
+  --text: #0a0a0a; --text-muted: #6b6b6b; --text-faint: #9a9a9a;
+  --accent: oklch(62% 0.19 252); --accent-soft: oklch(62% 0.19 252 / 0.10);
+  --accent-line: oklch(62% 0.19 252 / 0.30);
+}
+:root[data-theme="dark"] .light-only { display: none; }
+:root[data-theme="light"] .dark-only { display: none; }
+img { max-width: 100%; height: auto; border-radius: 8px; border: 1px solid var(--border); }
+.footer {
+  margin-top: 80px; padding-top: 24px; border-top: 1px solid var(--border);
+  color: var(--text-faint); font-size: 12.5px;
+}
+.footer code { font-size: 11.5px; }
+</style>
+
+</head>
+<body>
+<button class="theme-toggle" onclick="toggleTheme()">
+  <span class="dark-only">☼ light</span>
+  <span class="light-only">☾ dark</span>
+</button>
+<main class="wrap">
+<h1>osmRouter V2 — Deployment Guide</h1>
+<blockquote>
+<p>The full walkthrough from a freshly registered <code>osmrouter.com</code> to a live AI-tunneling SaaS.
+Companion docs: <code>README.md</code> (quick start) and the <a href="../../To%20Compile%20V2">To Compile V2</a> folder for the Mac client side.</p>
+</blockquote>
+<h2>0. Topology choices</h2>
+<table>
+<thead>
+<tr>
+<th>Topology</th>
+<th>When</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><strong>Single box</strong> (this guide&#39;s default)</td>
+<td>Up to ~500 active tunnels and ~1 Gbps total. Hetzner CX42 or similar.</td>
+</tr>
+<tr>
+<td><strong>API box + 1+ proxy fleet nodes</strong></td>
+<td>More than one region, or proxy fleet &gt; 1 Gbps</td>
+</tr>
+<tr>
+<td><strong>Managed DB + proxy fleet</strong></td>
+<td>When you don&#39;t want to babysit Postgres + Redis</td>
+</tr>
+</tbody></table>
+<h2>1. Prerequisites</h2>
+<pre><code class="language-bash">sudo apt update &amp;&amp; sudo apt install -y docker.io docker-compose-plugin git ufw caddy openssl
+sudo systemctl enable --now docker
+sudo usermod -aG docker $USER &amp;&amp; newgrp docker
+</code></pre>
+<p>DNS records at your registrar (replace IPs):</p>
+<table>
+<thead>
+<tr>
+<th>Record</th>
+<th>Name</th>
+<th>Value</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>A</td>
+<td><code>osmrouter.com</code>, <code>www</code>, <code>app</code>, <code>api</code>, <code>nodes</code>, <code>tunnel</code></td>
+<td>your server IPv4</td>
+</tr>
+<tr>
+<td>A</td>
+<td><code>*.osmrouter.com</code> <em>(optional, for the customer-less free tier)</em></td>
+<td>same</td>
+</tr>
+</tbody></table>
+<p>The <code>tunnel.osmrouter.com</code> record is <strong>the one your Mac sidecars dial</strong>. The leaf cert minted by <code>init-ca.sh</code> must have it as a SAN.</p>
+<h2>2. Drop the code</h2>
+<pre><code class="language-bash">scp -r ./osmRouter root@your-server:/opt/
+ssh root@your-server
+cd /opt/osmRouter
+</code></pre>
+<h2>3. Mint the operator CA + leaf</h2>
+<pre><code class="language-bash"># Edit the SAN list inside init-ca.sh BEFORE running — it must include
+# every hostname your sidecars will dial.  Default SANs cover dev only.
+SAN_LIST=&quot;DNS:tunnel.osmrouter.com&quot; ./scripts/init-ca.sh
+</code></pre>
+<p>This creates <code>ca/</code>:</p>
+<ul>
+<li><code>root.pem</code> — embedded into the Mac sidecar binary at build time. Distribute via the <em>To Compile V2</em> bundle.</li>
+<li><code>root.key</code> — keep on this box. Locked-down. Re-used only when rotating leaves or minting a new root.</li>
+<li><code>proxy-leaf.pem</code> + <code>.key</code> — mounted into the proxy container.</li>
+</ul>
+<h2>4. Generate secrets + write <code>.env</code></h2>
+<pre><code class="language-bash">cp .env.example .env
+./scripts/generate-secrets.sh &gt;&gt; .env
+chmod 600 .env
+nano .env        # fill in every «CHANGE» token + SMTP creds
+</code></pre>
+<p>Required fills:</p>
+<table>
+<thead>
+<tr>
+<th>Variable</th>
+<th>Set to</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>OSM_BRAND_DOMAIN</code></td>
+<td>your domain (e.g. <code>osmrouter.com</code>)</td>
+</tr>
+<tr>
+<td><code>OSM_PROXY_CNAME</code></td>
+<td><code>tunnel.osmrouter.com</code></td>
+</tr>
+<tr>
+<td><code>OSM_CORS_ORIGINS</code></td>
+<td><code>https://osmrouter.com,https://app.osmrouter.com,...</code></td>
+</tr>
+<tr>
+<td><code>OSM_COOKIE_DOMAIN</code></td>
+<td><code>.osmrouter.com</code></td>
+</tr>
+<tr>
+<td><code>OSM_NODE_ID</code></td>
+<td>unique per node, e.g. <code>proxy-blr-01</code></td>
+</tr>
+<tr>
+<td><code>NEXT_PUBLIC_API_BASE</code></td>
+<td><code>https://api.osmrouter.com</code></td>
+</tr>
+<tr>
+<td>5 crypto secrets + DB + Redis passwords</td>
+<td>already filled by <code>generate-secrets.sh</code></td>
+</tr>
+<tr>
+<td>SMTP credentials</td>
+<td>from your provider (Postmark / SendGrid / SES)</td>
+</tr>
+</tbody></table>
+<h2>5. Wire SMTP</h2>
+<p><code>server/internal/auth/service.go</code> has a <code>// TODO: send email</code> line in <code>Register()</code>. Replace it with a real send via <code>net/smtp</code> or your provider&#39;s SDK. Until you do, OTP codes are stored hashed but never delivered → public signups will hang.</p>
+<h2>6. Bring it up</h2>
+<pre><code class="language-bash">docker compose -f deploy/docker-compose.yml --env-file .env up -d --build
+</code></pre>
+<p>Wait ~60 seconds for the build + first-boot. Then:</p>
+<pre><code class="language-bash">docker compose -f deploy/docker-compose.yml logs --tail=40
+# expect:
+#   osm-server   ... http server listening  addr=:8080 env=prod
+#   osm-proxy    ... tls listener up        addr=:8443
+#   osm-proxy    ... public listener up     addr=:8000
+#   osm-web      ... Ready in &lt;ms&gt;
+curl -sf http://127.0.0.1:8080/healthz   # → {&quot;env&quot;:&quot;prod&quot;,&quot;status&quot;:&quot;ok&quot;}
+</code></pre>
+<h2>7. TLS terminator in front</h2>
+<p>The proxy&#39;s <strong>public listener</strong> on <code>:8000</code> and the <strong>dashboard</strong> on <code>:3000</code> (loopback only) need TLS terminated by a reverse proxy. The proxy&#39;s <strong>TLS listener</strong> on <code>:8443</code> terminates its own TLS with the operator CA — leave it alone.</p>
+<pre><code class="language-bash">sudo nano /etc/caddy/Caddyfile      # copy from deploy/Caddyfile.example
+sudo caddy reload
+</code></pre>
+<p>Caddy will auto-fetch Let&#39;s Encrypt certs for <code>osmrouter.com</code>, <code>api.osmrouter.com</code>, etc.</p>
+<h2>8. Promote yourself to admin</h2>
+<pre><code class="language-bash">docker exec -it osmrouter-v2-postgres-1 psql -U osm -d osm \
+  -c &quot;UPDATE users SET role=&#39;admin&#39; WHERE email=&#39;you@osmrouter.com&#39;;&quot;
+</code></pre>
+<p>(After you&#39;ve signed up via the dashboard at <code>https://app.osmrouter.com</code>.)</p>
+<h2>9. Hand customers the Mac app</h2>
+<p>Build the desktop binary from the <strong>To Compile V2</strong> folder. The build process embeds your <code>ca/root.pem</code> into the sidecar so the trust anchor travels with the app. Distribute the signed/notarized <code>.dmg</code> from <code>https://download.osmrouter.com/...</code>.</p>
+<h2>10. End-to-end verification</h2>
+<p>From a customer&#39;s perspective:</p>
+<ol>
+<li>Sign up at <code>https://app.osmrouter.com</code> → verify email → land on dashboard.</li>
+<li>Add a domain you own → copy the CNAME (<code>tunnel.osmrouter.com</code>) and TXT record → paste into your registrar.</li>
+<li>Wait one minute → status flips to <strong>Verified</strong> in real time.</li>
+<li>Add a device → save API key.</li>
+<li>Download + launch the Mac app → paste API key → it auto-tunnels.</li>
+<li>Bind a subdomain to your device.</li>
+<li>From another machine: <code>curl https://app.your-domain.com</code> → reaches your local app.</li>
+<li>For an OpenAI-compatible LLM: point your local server at <code>:1234</code> (LM Studio) or <code>:11434</code> (Ollama), bind a subdomain, then <code>curl -N -X POST https://llm.your-domain.com/v1/chat/completions -d &#39;{&quot;model&quot;:&quot;...&quot;,&quot;stream&quot;:true,&quot;messages&quot;:[...]}&#39;</code> → tokens stream chunk-by-chunk in real time.</li>
+</ol>
+<h2>11. Backups</h2>
+<pre><code class="language-bash"># Postgres logical dump
+docker exec osmrouter-v2-postgres-1 pg_dump -U osm osm | gzip | \
+  aws s3 cp - s3://backups.osmrouter.com/$(date -u +%Y%m%dT%H%M%S).sql.gz
+</code></pre>
+<p>Schedule hourly via cron.</p>
+<h2>12. Updating</h2>
+<pre><code class="language-bash">cd /opt/osmRouter
+git pull
+docker compose -f deploy/docker-compose.yml --env-file .env build
+docker compose -f deploy/docker-compose.yml --env-file .env up -d
+</code></pre>
+<p>Pre-existing sidecar connections survive a brief proxy restart (sidecar&#39;s exponential backoff reconnects within 1–30 s).</p>
+<h2>13. CA rotation</h2>
+<pre><code class="language-bash"># Two weeks before expiry of the leaf:
+./scripts/init-ca.sh                # mints fresh proxy-leaf using same root
+docker compose ... up -d --force-recreate proxy
+
+# Every several years for the root:
+./scripts/init-ca.sh --rotate-root
+# → rebuild + ship Mac app with the new embedded root.pem during a 2-week
+#   overlap window where BOTH roots are still trusted by the proxy. After
+#   the overlap, retire the old root.
+</code></pre>
+<h2>14. Troubleshooting</h2>
+<p><strong>Proxy log shows <code>verify-failed: host not bound to this device</code></strong>
+→ User clicked &quot;Bind&quot; but the host string the sidecar sent doesn&#39;t match what&#39;s in the DB. Check <code>OSM_PROXY_CNAME</code> matches the FQDN the user added.</p>
+<p><strong>Sidecar log shows <code>tls-handshake: certificate signed by unknown authority</code></strong>
+→ The Mac binary was built against an older CA. Rebuild + redistribute, or run during a CA-rotation overlap window.</p>
+<p><strong>LLM streaming buffers instead of chunking</strong>
+→ Check that the TLS terminator in front of <code>:8000</code> is configured to flush small writes. Caddy does by default; nginx requires <code>proxy_buffering off;</code> in the location block.</p>
+<p><strong>Long inference (&gt;30 s) returns 504</strong>
+→ Increase <code>proxy_read_timeout</code> on your TLS terminator. Caddy defaults to 5 minutes which is fine.</p>
+<h2>15. The five honest deferrals (v2.1)</h2>
+<ul>
+<li>Real Cloudflare-for-SaaS for customer custom domains</li>
+<li>Stripe webhook handler</li>
+<li>WebAuthn admin MFA</li>
+<li>Per-node proxy mTLS (replaces shared Bearer)</li>
+<li>Auto-rotation of the leaf cert</li>
+</ul>
+
+<div class="footer">
+  Source: the markdown sibling of this file in the same folder.
+  Reference implementation: <code>github.com/osmrouter</code> (in this repository).
+</div>
+</main>
+<script>
+function toggleTheme() {
+  const r = document.documentElement;
+  const next = r.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
+  r.setAttribute('data-theme', next);
+  try { localStorage.setItem('osm-paper-theme', next); } catch (e) {}
+}
+(function() {
+  try {
+    const t = localStorage.getItem('osm-paper-theme');
+    if (t) document.documentElement.setAttribute('data-theme', t);
+  } catch (e) {}
+})();
+</script>
+</body>
+</html>

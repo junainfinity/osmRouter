@@ -1,0 +1,52 @@
+{
+  "name": "@osmrouter/desktop",
+  "version": "0.1.0",
+  "private": true,
+  "description": "osmRouter Mac desktop app",
+  "main": ".vite/build/main.js",
+  "type": "module",
+  "scripts": {
+    "dev": "electron-forge start",
+    "package": "electron-forge package",
+    "make": "electron-forge make",
+    "build:renderer": "cd renderer && next build",
+    "build:hash": "node scripts/hash-sidecar.mjs",
+    "test": "vitest run",
+    "test:watch": "vitest"
+  },
+  "dependencies": {
+    "@osmrouter/shared": "0.1.0",
+    "electron-squirrel-startup": "^1.0.1",
+    "keytar": "^7.9.0",
+    "pino": "^9.5.0",
+    "pino-pretty": "^11.3.0",
+    "zod": "^3.23.8",
+    "zustand": "^5.0.2",
+    "next": "^15.0.3",
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1"
+  },
+  "devDependencies": {
+    "@electron-forge/cli": "^7.6.0",
+    "@electron-forge/maker-dmg": "^7.6.0",
+    "@electron-forge/maker-zip": "^7.6.0",
+    "@electron-forge/plugin-vite": "^7.6.0",
+    "@playwright/test": "^1.48.2",
+    "@types/node": "^22.10.1",
+    "@types/react": "^18.3.12",
+    "@types/react-dom": "^18.3.1",
+    "@vitejs/plugin-react": "^4.3.4",
+    "autoprefixer": "^10.4.20",
+    "electron": "^33.2.1",
+    "jsdom": "^25.0.1",
+    "playwright": "^1.48.2",
+    "postcss": "^8.5.1",
+    "tailwindcss": "^3.4.17",
+    "typescript": "^5.6.3",
+    "vite": "^5.4.11",
+    "vitest": "^2.1.8"
+  },
+  "config": {
+    "forge": "./forge.config.js"
+  }
+}

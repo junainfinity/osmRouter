@@ -1,0 +1,14 @@
+node_modules/
+dist/
+out/
+.next/
+.cache/
+.DS_Store
+*.log
+coverage/
+apps/desktop/resources/osm-agent-*
+apps/desktop/resources/sidecar-hash.json
+apps/desktop/renderer/out/
+apps/desktop/.vite/
+playwright-report/
+test-results/

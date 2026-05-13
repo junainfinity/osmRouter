@@ -1,0 +1,108 @@
+# ── Secrets — never commit ──────────────────────────────────────────────────
+.env
+.env.local
+.env.*.local
+.env.production
+*.pem
+*.key
+ca/                     # Operator root CA + private keys
+**/secrets/
+**/secret/
+
+# ── Build artefacts ─────────────────────────────────────────────────────────
+node_modules/
+.next/
+out/
+.vite/
+.cache/
+dist/
+build/
+.turbo/
+.swc/
+.parcel-cache/
+
+# Go binaries / build cache
+*.exe
+*.test
+*.out
+osm-agent
+osm-agent-darwin-*
+osm-agent-linux-*
+osm-agent-windows-*
+server/api
+server/dev-redis
+
+# Electron build outputs
+apps/desktop/out/
+**/osmRouter-darwin-*/
+**/osmRouter.app/
+*.dmg
+*.zip
+*.app.zip
+
+# Renderer static export
+**/renderer/out/
+**/renderer/.next/
+**/resources/renderer/
+**/resources/sidecar-hash.json
+**/resources/osm-agent-*
+
+# Demo + runtime state
+.demo-state/
+*.log
+logs/
+tmp/
+
+# ── Test outputs ────────────────────────────────────────────────────────────
+coverage/
+.nyc_output/
+test-results/
+playwright-report/
+playwright/.cache/
+
+# ── IDE / OS junk ───────────────────────────────────────────────────────────
+.DS_Store
+.idea/
+.vscode/
+*.swp
+*.swo
+*~
+Thumbs.db
+
+# ── Package managers ────────────────────────────────────────────────────────
+.pnp.*
+.yarn/
+
+# ── Database snapshots / dumps ──────────────────────────────────────────────
+*.sql.gz
+*.dump
+osm-dev.db
+osm-dev.db-journal
+
+# ── Local stores written by Electron at runtime ─────────────────────────────
+**/Application Support/
+SingletonLock
+SingletonCookie
+SingletonSocket
+
+# ── Per-app caches Electron Forge produces ──────────────────────────────────
+**/.vite/build/
+**/Code Cache/
+**/GPUCache/
+**/DawnGraphiteCache/
+**/DawnWebGPUCache/
+**/Shared Dictionary/
+**/Session Storage/
+
+# ── Obsidian local workspace state (keep the vault structure, drop user prefs) ──
+.obsidian/workspace.json
+.obsidian/workspace-mobile.json
+
+# Intentionally keep:
+#  - .obsidian/community-plugins.json (so collaborators install the same plugins)
+#  - .obsidian/app.json (shared app prefs)
+#  - all markdown files
+
+# ── Local-only files for this dev's machine ─────────────────────────────────
+/private/
+**/private/

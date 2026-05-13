@@ -1,0 +1,82 @@
+# nginx reverse-proxy config for osmRouter.
+# Companion to: docker-compose.yml exposing 3000, 8080, 8000, 8001 on loopback.
+# TLS via certbot:  certbot --nginx -d osmrouter.com -d api.osmrouter.com -d nodes.osmrouter.com
+
+# ---- Dashboard ----
+server {
+    listen 443 ssl http2;
+    server_name osmrouter.com www.osmrouter.com app.osmrouter.com;
+
+    # ssl_certificate, ssl_certificate_key:  /etc/letsencrypt/live/osmrouter.com/...
+    # (certbot manages these)
+
+    add_header Strict-Transport-Security "max-age=63072000; includeSubDomains; preload" always;
+    add_header X-Content-Type-Options nosniff;
+    add_header Referrer-Policy "strict-origin-when-cross-origin";
+
+    location / {
+        proxy_pass http://127.0.0.1:3000;
+        proxy_set_header Host $host;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+    }
+}
+
+# ---- Control Plane API ----
+server {
+    listen 443 ssl http2;
+    server_name api.osmrouter.com;
+
+    add_header Strict-Transport-Security "max-age=63072000; includeSubDomains; preload" always;
+
+    location / {
+        proxy_pass http://127.0.0.1:8080;
+        proxy_set_header Host $host;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+    }
+}
+
+# ---- Proxy node, visitor traffic ----
+# Wildcard: customer's `app.theirdomain.com` lands here once they CNAME to
+# nodes.osmrouter.com (and Cloudflare-for-SaaS provisions the TLS, OR you
+# wildcard-cert all customer domains yourself, OR you let your customers
+# bring their own cert).
+server {
+    listen 443 ssl http2;
+    server_name nodes.osmrouter.com;
+
+    location / {
+        proxy_pass http://127.0.0.1:8000;
+        proxy_set_header Host $host;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+        proxy_buffering off;     # don't buffer responses
+        proxy_read_timeout 60s;
+    }
+}
+
+# ---- Proxy node, tunnel listener (WSS) ----
+server {
+    listen 443 ssl http2;
+    server_name tunnel.osmrouter.com;
+
+    location /ws/tunnel {
+        proxy_pass http://127.0.0.1:8001;
+        proxy_http_version 1.1;
+        proxy_set_header Upgrade $http_upgrade;
+        proxy_set_header Connection "upgrade";
+        proxy_set_header Host $host;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        # Long-lived: don't time out
+        proxy_read_timeout 7d;
+        proxy_send_timeout 7d;
+    }
+}
+
+# ---- HTTP→HTTPS redirect ----
+server {
+    listen 80;
+    server_name osmrouter.com www.osmrouter.com app.osmrouter.com api.osmrouter.com nodes.osmrouter.com tunnel.osmrouter.com;
+    return 301 https://$host$request_uri;
+}
