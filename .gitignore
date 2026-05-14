@@ -5,7 +5,8 @@
 .env.production
 *.pem
 *.key
-ca/                     # Operator root CA + private keys
+/ca/                    # Operator root CA + private keys (top-level only)
+/ca/**
 **/secrets/
 **/secret/
 

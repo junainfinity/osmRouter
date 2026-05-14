@@ -47,6 +47,8 @@
 - [[Dev Logs/2026-05-12 - Session 5 - Option D Execution]]  — **Phase 5 (Option D pivot + V2 bundles)**
 - [[Dev Logs/2026-05-12 - Session 6 - Mac App Signin First Principles]]  — Phase 6 (paste-key signin, cloud listing, services tab, web rebind UI)
 - [[Dev Logs/2026-05-13 - Session 7 - DNS + Per-Registrar Docs]]  — **Phase 7 (per-registrar guide, modal portal fix, on-demand TLS, a2a.one live)**
+- [[Dev Logs/2026-05-13 - Session 8 - Rebind a2a.one to Port 1686]]  — Phase 8 (rebind diagnosis, sidecar re-spawn, stream-only osmBroker inference via a2a.one)
+- [[Dev Logs/2026-05-14 - Session 9 - Per-Model Sweep + Codex Plan Limits]]  — **Phase 9 (7-model sweep via a2a.one, Codex/ChatGPT plan limits diagnosed, osmBroker Serve pane shows live model IDs, code-signing fixed)**
 
 ### Papers
 - [[Whitepaper/osmRouter-Whitepaper]]  (also rendered to `osmRouter-Whitepaper.html`)
