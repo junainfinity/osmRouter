@@ -17,7 +17,11 @@
 import { useMemo, useState } from "react";
 import type { Domain } from "@/lib/types";
 
-const SERVER_IPV4 = "157.180.124.246";
+// Operator-specific edge IP. Set NEXT_PUBLIC_OSM_EDGE_IP in your deploy env so
+// customers see the right value in this guide. Falls back to the RFC 5737
+// documentation range so a misconfigured deploy is visibly wrong, not silently
+// pointing at someone else's box.
+const SERVER_IPV4 = process.env.NEXT_PUBLIC_OSM_EDGE_IP || "198.51.100.10";
 
 type Registrar = {
   id: string;

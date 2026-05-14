@@ -1,12 +1,12 @@
 // @ts-nocheck
-import * as __fd_glob_49 from "../content/docs/resources/status.mdx?collection=docs"
-import * as __fd_glob_48 from "../content/docs/resources/pricing.mdx?collection=docs"
-import * as __fd_glob_47 from "../content/docs/resources/index.mdx?collection=docs"
-import * as __fd_glob_46 from "../content/docs/resources/changelog.mdx?collection=docs"
-import * as __fd_glob_45 from "../content/docs/troubleshooting/upstream-errors.mdx?collection=docs"
-import * as __fd_glob_44 from "../content/docs/troubleshooting/tunnel-diagnostics.mdx?collection=docs"
-import * as __fd_glob_43 from "../content/docs/troubleshooting/index.mdx?collection=docs"
-import * as __fd_glob_42 from "../content/docs/troubleshooting/error-codes.mdx?collection=docs"
+import * as __fd_glob_49 from "../content/docs/troubleshooting/upstream-errors.mdx?collection=docs"
+import * as __fd_glob_48 from "../content/docs/troubleshooting/tunnel-diagnostics.mdx?collection=docs"
+import * as __fd_glob_47 from "../content/docs/troubleshooting/index.mdx?collection=docs"
+import * as __fd_glob_46 from "../content/docs/troubleshooting/error-codes.mdx?collection=docs"
+import * as __fd_glob_45 from "../content/docs/resources/status.mdx?collection=docs"
+import * as __fd_glob_44 from "../content/docs/resources/pricing.mdx?collection=docs"
+import * as __fd_glob_43 from "../content/docs/resources/index.mdx?collection=docs"
+import * as __fd_glob_42 from "../content/docs/resources/changelog.mdx?collection=docs"
 import * as __fd_glob_41 from "../content/docs/osmbroker/supported-clis.mdx?collection=docs"
 import * as __fd_glob_40 from "../content/docs/osmbroker/serve-pane.mdx?collection=docs"
 import * as __fd_glob_39 from "../content/docs/osmbroker/plug-in-clients.mdx?collection=docs"
@@ -44,8 +44,8 @@ import { default as __fd_glob_8 } from "../content/docs/troubleshooting/meta.jso
 import { default as __fd_glob_7 } from "../content/docs/resources/meta.json?collection=docs"
 import { default as __fd_glob_6 } from "../content/docs/osmbroker/meta.json?collection=docs"
 import { default as __fd_glob_5 } from "../content/docs/mac-app/meta.json?collection=docs"
-import { default as __fd_glob_4 } from "../content/docs/dashboard/meta.json?collection=docs"
-import { default as __fd_glob_3 } from "../content/docs/getting-started/meta.json?collection=docs"
+import { default as __fd_glob_4 } from "../content/docs/getting-started/meta.json?collection=docs"
+import { default as __fd_glob_3 } from "../content/docs/dashboard/meta.json?collection=docs"
 import { default as __fd_glob_2 } from "../content/docs/dns/meta.json?collection=docs"
 import { default as __fd_glob_1 } from "../content/docs/concepts/meta.json?collection=docs"
 import { default as __fd_glob_0 } from "../content/docs/meta.json?collection=docs"
@@ -57,4 +57,4 @@ const create = server<typeof Config, import("fumadocs-mdx/runtime/types").Intern
   }
 }>({"doc":{"passthroughs":["extractedReferences"]}});
 
-export const docs = await create.docs("docs", "content/docs", {"meta.json": __fd_glob_0, "concepts/meta.json": __fd_glob_1, "dns/meta.json": __fd_glob_2, "getting-started/meta.json": __fd_glob_3, "dashboard/meta.json": __fd_glob_4, "mac-app/meta.json": __fd_glob_5, "osmbroker/meta.json": __fd_glob_6, "resources/meta.json": __fd_glob_7, "troubleshooting/meta.json": __fd_glob_8, }, {"index.mdx": __fd_glob_9, "concepts/architecture.mdx": __fd_glob_10, "concepts/index.mdx": __fd_glob_11, "concepts/sovereignty-and-trust.mdx": __fd_glob_12, "dashboard/billing.mdx": __fd_glob_13, "dashboard/dashboard-home.mdx": __fd_glob_14, "dashboard/devices.mdx": __fd_glob_15, "dashboard/domains.mdx": __fd_glob_16, "dashboard/index.mdx": __fd_glob_17, "dashboard/settings.mdx": __fd_glob_18, "dashboard/sign-up-and-sign-in.mdx": __fd_glob_19, "dns/cloudflare.mdx": __fd_glob_20, "dns/generic.mdx": __fd_glob_21, "dns/godaddy.mdx": __fd_glob_22, "dns/hostinger.mdx": __fd_glob_23, "dns/index.mdx": __fd_glob_24, "dns/namecheap.mdx": __fd_glob_25, "dns/porkbun.mdx": __fd_glob_26, "dns/squarespace.mdx": __fd_glob_27, "getting-started/index.mdx": __fd_glob_28, "getting-started/quick-start.mdx": __fd_glob_29, "mac-app/cloud-domains.mdx": __fd_glob_30, "mac-app/diagnostics.mdx": __fd_glob_31, "mac-app/domains-tab.mdx": __fd_glob_32, "mac-app/index.mdx": __fd_glob_33, "mac-app/install-and-signin.mdx": __fd_glob_34, "mac-app/services-tab.mdx": __fd_glob_35, "mac-app/settings.mdx": __fd_glob_36, "osmbroker/index.mdx": __fd_glob_37, "osmbroker/overview.mdx": __fd_glob_38, "osmbroker/plug-in-clients.mdx": __fd_glob_39, "osmbroker/serve-pane.mdx": __fd_glob_40, "osmbroker/supported-clis.mdx": __fd_glob_41, "troubleshooting/error-codes.mdx": __fd_glob_42, "troubleshooting/index.mdx": __fd_glob_43, "troubleshooting/tunnel-diagnostics.mdx": __fd_glob_44, "troubleshooting/upstream-errors.mdx": __fd_glob_45, "resources/changelog.mdx": __fd_glob_46, "resources/index.mdx": __fd_glob_47, "resources/pricing.mdx": __fd_glob_48, "resources/status.mdx": __fd_glob_49, });
+export const docs = await create.docs("docs", "content/docs", {"meta.json": __fd_glob_0, "concepts/meta.json": __fd_glob_1, "dns/meta.json": __fd_glob_2, "dashboard/meta.json": __fd_glob_3, "getting-started/meta.json": __fd_glob_4, "mac-app/meta.json": __fd_glob_5, "osmbroker/meta.json": __fd_glob_6, "resources/meta.json": __fd_glob_7, "troubleshooting/meta.json": __fd_glob_8, }, {"index.mdx": __fd_glob_9, "concepts/architecture.mdx": __fd_glob_10, "concepts/index.mdx": __fd_glob_11, "concepts/sovereignty-and-trust.mdx": __fd_glob_12, "dashboard/billing.mdx": __fd_glob_13, "dashboard/dashboard-home.mdx": __fd_glob_14, "dashboard/devices.mdx": __fd_glob_15, "dashboard/domains.mdx": __fd_glob_16, "dashboard/index.mdx": __fd_glob_17, "dashboard/settings.mdx": __fd_glob_18, "dashboard/sign-up-and-sign-in.mdx": __fd_glob_19, "dns/cloudflare.mdx": __fd_glob_20, "dns/generic.mdx": __fd_glob_21, "dns/godaddy.mdx": __fd_glob_22, "dns/hostinger.mdx": __fd_glob_23, "dns/index.mdx": __fd_glob_24, "dns/namecheap.mdx": __fd_glob_25, "dns/porkbun.mdx": __fd_glob_26, "dns/squarespace.mdx": __fd_glob_27, "getting-started/index.mdx": __fd_glob_28, "getting-started/quick-start.mdx": __fd_glob_29, "mac-app/cloud-domains.mdx": __fd_glob_30, "mac-app/diagnostics.mdx": __fd_glob_31, "mac-app/domains-tab.mdx": __fd_glob_32, "mac-app/index.mdx": __fd_glob_33, "mac-app/install-and-signin.mdx": __fd_glob_34, "mac-app/services-tab.mdx": __fd_glob_35, "mac-app/settings.mdx": __fd_glob_36, "osmbroker/index.mdx": __fd_glob_37, "osmbroker/overview.mdx": __fd_glob_38, "osmbroker/plug-in-clients.mdx": __fd_glob_39, "osmbroker/serve-pane.mdx": __fd_glob_40, "osmbroker/supported-clis.mdx": __fd_glob_41, "resources/changelog.mdx": __fd_glob_42, "resources/index.mdx": __fd_glob_43, "resources/pricing.mdx": __fd_glob_44, "resources/status.mdx": __fd_glob_45, "troubleshooting/error-codes.mdx": __fd_glob_46, "troubleshooting/index.mdx": __fd_glob_47, "troubleshooting/tunnel-diagnostics.mdx": __fd_glob_48, "troubleshooting/upstream-errors.mdx": __fd_glob_49, });

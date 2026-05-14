@@ -14,7 +14,9 @@ WORKDIR /app
 # the value must be present BEFORE `next build` runs. docker-compose passes
 # this via the `args:` block on the web service.
 ARG NEXT_PUBLIC_API_BASE
-ENV NEXT_PUBLIC_API_BASE=$NEXT_PUBLIC_API_BASE
+ARG NEXT_PUBLIC_OSM_EDGE_IP
+ENV NEXT_PUBLIC_API_BASE=$NEXT_PUBLIC_API_BASE \
+    NEXT_PUBLIC_OSM_EDGE_IP=$NEXT_PUBLIC_OSM_EDGE_IP
 COPY --from=deps /app/node_modules ./node_modules
 COPY web/ ./
 ENV NEXT_TELEMETRY_DISABLED=1 CI=true

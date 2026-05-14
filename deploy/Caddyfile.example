@@ -1,0 +1,56 @@
+# osmRouter — production Caddyfile template.
+#
+# Caddy terminates public TLS for both your brand pages and your customers'
+# bring-your-own-domain hostnames. Replace `osmrouter.com` below with your
+# operator's domain, and replace the support email in the global block.
+#
+# Drop this file at /etc/caddy/Caddyfile on the box, then `sudo caddy reload`.
+
+{
+    # Used by Let's Encrypt for outage notifications.
+    email YOUR-EMAIL@example.com
+
+    on_demand_tls {
+        # Caddy asks the control plane whether a hostname is a verified
+        # customer domain before minting a Let's Encrypt cert for it.
+        # The control plane returns 200 if it knows the host, 404 otherwise.
+        ask http://127.0.0.1:8080/api/v1/internal/caddy-allow
+    }
+}
+
+# ── Operator brand surfaces (specific blocks, no on-demand) ──────────────
+# Replace `osmrouter.com` with your own operator domain.
+
+osmrouter.com, www.osmrouter.com {
+    reverse_proxy 127.0.0.1:3000      # Next.js dashboard
+    encode gzip
+}
+
+app.osmrouter.com {
+    reverse_proxy 127.0.0.1:3000      # same dashboard, app subdomain alias
+    encode gzip
+}
+
+api.osmrouter.com {
+    reverse_proxy 127.0.0.1:8080      # Go control plane
+    encode gzip
+}
+
+docs.osmrouter.com {
+    reverse_proxy 127.0.0.1:3001      # Fumadocs docs site
+    encode gzip
+}
+
+# ── Catch-all for every customer-bound domain ────────────────────────────
+# Any visitor hitting :443 with a Host header NOT matched above falls here.
+# Caddy asks the control plane (via `on_demand_tls.ask`); on a 2xx response
+# Caddy mints a Let's Encrypt cert for the hostname and proxies into the
+# osm-proxy data plane on :8000.
+
+:443 {
+    tls {
+        on_demand
+    }
+    reverse_proxy 127.0.0.1:8000
+    encode gzip
+}

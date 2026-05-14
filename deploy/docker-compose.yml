@@ -106,14 +106,16 @@ services:
       context: ..
       dockerfile: deploy/Dockerfile.web
       args:
-        NEXT_PUBLIC_API_BASE: ${NEXT_PUBLIC_API_BASE:?required}
+        NEXT_PUBLIC_API_BASE:     ${NEXT_PUBLIC_API_BASE:?required}
+        NEXT_PUBLIC_OSM_EDGE_IP:  ${NEXT_PUBLIC_OSM_EDGE_IP:?required}
     restart: always
     depends_on:
       - server
     ports:
       - "127.0.0.1:3000:3000"
     environment:
-      NEXT_PUBLIC_API_BASE: ${NEXT_PUBLIC_API_BASE}
+      NEXT_PUBLIC_API_BASE:    ${NEXT_PUBLIC_API_BASE}
+      NEXT_PUBLIC_OSM_EDGE_IP: ${NEXT_PUBLIC_OSM_EDGE_IP}
 
   # docs.osmrouter.com — Fumadocs static-rendered Next.js site.
   # No DB/Redis dependency, no auth, no API calls at runtime; entirely static

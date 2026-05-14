@@ -11,13 +11,16 @@ Most domain registrars give you a "DNS records" or "Manage DNS" screen with a ta
 
 | # | Type | Name | Value | TTL |
 |---|---|---|---|---|
-| 1 | `A` | `@` (or your apex, e.g. `example.com`) | `157.180.124.246` | `600` |
-| 2 | `A` | `*` (wildcard) | `157.180.124.246` | `600` |
+| 1 | `A` | `@` (or your apex, e.g. `example.com`) | `198.51.100.10` | `600` |
+| 2 | `A` | `*` (wildcard) | `198.51.100.10` | `600` |
 
 That's it. Two A records, both pointing at our edge IP.
 
-<Callout type="info">
-  The IP shown here is osmRouter's primary edge. Multi-region edges are coming in v2.1 — if you see different IPs in the Add-domain modal, use those instead.
+<Callout type="warn">
+  **The IP `198.51.100.10` in the tables above is a placeholder** (RFC 5737 reserved
+  for documentation). Your osmRouter operator's actual edge IP is shown in your
+  dashboard at **Domains → Add a domain** — use *that* value when you add the records.
+  Different operators run on different IPs.
 </Callout>
 
 ## Why two records
@@ -47,10 +50,10 @@ After saving the records, you can confirm they're live with `dig`:
 
 ```bash
 $ dig example.com +short
-157.180.124.246
+198.51.100.10
 
 $ dig api.example.com +short
-157.180.124.246
+198.51.100.10
 ```
 
 If both return the right IP, you're done — the osmRouter verifier will catch up within a minute.
