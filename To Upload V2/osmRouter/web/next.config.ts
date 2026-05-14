@@ -12,17 +12,29 @@ const apiOrigin = (() => {
 })();
 const apiWsOrigin = apiOrigin.replace(/^https:/, "wss:").replace(/^http:/, "ws:");
 
-// CSP for the dashboard (app/(app)/*, /login, /signup, /verify). Next.js emits
-// inline bootstrap scripts; production-strict CSP requires a nonce middleware.
-// v1 allows 'unsafe-inline'; nonce-based CSP is on the v1.1 hardening list
-// (documented in HANDOFF.md).
+// Google Analytics 4 / gtag.js hosts. gtag is injected into every page (the
+// static landing.html and every Next.js page via app/layout.tsx) so EVERY CSP
+// variant below has to whitelist these:
+//   - script-src     → loading the gtag.js bundle from www.googletagmanager.com
+//   - connect-src    → gtag.js POSTs to www.google-analytics.com + region nodes
+//                      (e.g. region1.google-analytics.com)
+//   - img-src        → 1×1 pageview pixels from www.google-analytics.com
+const gaScript  = "https://www.googletagmanager.com";
+const gaConnect = "https://www.google-analytics.com https://*.google-analytics.com https://*.analytics.google.com https://www.googletagmanager.com";
+const gaImg     = "https://www.google-analytics.com https://*.google-analytics.com https://www.googletagmanager.com";
+
+// CSP for the dashboard (app/(app)/*, /login, /signup, /verify, /admin/*).
+// Next.js emits inline bootstrap scripts; production-strict CSP requires a
+// nonce middleware. v1 allows 'unsafe-inline'; nonce-based CSP is on the v1.1
+// hardening list (documented in HANDOFF.md).
 const cspStrict = [
   "default-src 'self'",
-  `script-src 'self' 'unsafe-inline' ${isDev ? "'unsafe-eval'" : ""}`.trim(),
+  `script-src 'self' 'unsafe-inline' ${gaScript} ${isDev ? "'unsafe-eval'" : ""}`.trim(),
+  `script-src-elem 'self' 'unsafe-inline' ${gaScript}`,
   "style-src 'self' 'unsafe-inline' fonts.googleapis.com",
   "font-src 'self' fonts.gstatic.com",
-  "img-src 'self' data: blob:",
-  `connect-src 'self' ws: wss: http://localhost:8080 ws://localhost:8080 ${apiOrigin} ${apiWsOrigin}`,
+  `img-src 'self' data: blob: ${gaImg}`,
+  `connect-src 'self' ws: wss: http://localhost:8080 ws://localhost:8080 ${apiOrigin} ${apiWsOrigin} ${gaConnect}`,
   "frame-ancestors 'none'",
   "base-uri 'self'",
   "form-action 'self'",
@@ -33,19 +45,20 @@ const cspStrict = [
 // directly at `/landing.html`). The new landing is a self-contained HTML file
 // that loads React + ReactDOM + Babel-standalone from unpkg and compiles
 // inline JSX at runtime — so it needs `unpkg.com` in script-src AND
-// `'unsafe-eval'` for Babel-standalone's runtime transform.
+// `'unsafe-eval'` for Babel-standalone's runtime transform. It ALSO loads
+// gtag.js — same allowlist as the strict CSP.
 //
 // v1.1 follow-up: pre-compile the landing's JSX (Babel CLI build step) and
 // self-host React+ReactDOM, so we can drop both `https://unpkg.com` and
 // `'unsafe-eval'` from the landing's CSP. Tracked in HANDOFF.md.
 const cspLanding = [
   "default-src 'self'",
-  "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://unpkg.com",
-  "script-src-elem 'self' 'unsafe-inline' https://unpkg.com",
+  `script-src 'self' 'unsafe-inline' 'unsafe-eval' https://unpkg.com ${gaScript}`,
+  `script-src-elem 'self' 'unsafe-inline' https://unpkg.com ${gaScript}`,
   "style-src 'self' 'unsafe-inline' fonts.googleapis.com",
   "font-src 'self' fonts.gstatic.com",
-  "img-src 'self' data: blob:",
-  `connect-src 'self' ws: wss: http://localhost:8080 ws://localhost:8080 ${apiOrigin} ${apiWsOrigin}`,
+  `img-src 'self' data: blob: ${gaImg}`,
+  `connect-src 'self' ws: wss: http://localhost:8080 ws://localhost:8080 ${apiOrigin} ${apiWsOrigin} ${gaConnect}`,
   "frame-ancestors 'none'",
   "base-uri 'self'",
   "form-action 'self'",
