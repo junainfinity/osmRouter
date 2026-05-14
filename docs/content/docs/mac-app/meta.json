@@ -1,0 +1,12 @@
+{
+  "title": "Mac App",
+  "pages": [
+    "index",
+    "install-and-signin",
+    "services-tab",
+    "domains-tab",
+    "cloud-domains",
+    "settings",
+    "diagnostics"
+  ]
+}

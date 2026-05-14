@@ -1,87 +1,131 @@
-# osmRouter cloud-side stack — runs all backend services in containers.
-# The Mac runs only the tunnel-client + the user's local app.
+# osmRouter V2 — production cloud stack.
 #
-# Bring up:    docker compose -f deploy/docker-compose.yml up -d --build
+# Bring up:    docker compose -f deploy/docker-compose.yml --env-file ../.env up -d --build
 # Tear down:   docker compose -f deploy/docker-compose.yml down -v
 #
-# Ports exposed to host:
-#   - 3030  : Next.js dashboard          (browser → http://localhost:3030)
-#   - 8080  : Control Plane API          (used by dashboard + proxy node)
-#   - 6379  : Redis                      (used by proxy node + Control Plane)
-#   - 8000  : Proxy public listener      (visitor traffic enters here)
-#   - 8001  : Proxy tunnel listener      (osmrouter-client on Mac connects here)
+# Pre-flight (one-time):
+#   ./scripts/init-ca.sh          # mints ca/ with root.pem + proxy-leaf.{pem,key}
+#   cp .env.example .env          # then edit every «CHANGE» token
+#   ./scripts/generate-secrets.sh >> .env
+#
+# Public ports:
+#   3030  Next.js dashboard (front this with TLS terminator in prod)
+#   8080  Control Plane API
+#   8000  Proxy public listener (visitor traffic; TLS-terminate in front)
+#   8443  Proxy tunnel listener (sidecar inbound; THIS terminates TLS itself with operator CA)
+#   6379  Redis (loopback only in prod; not exposed via this compose)
 
-name: osmrouter
+name: osmrouter-v2
 
 services:
   redis:
     image: redis:7-alpine
-    container_name: osm-redis
-    ports:
-      - "6379:6379"
+    restart: always
+    command: ["redis-server", "--requirepass", "${REDIS_PASSWORD:?required}", "--appendonly", "yes"]
+    volumes:
+      - redis-data:/data
     healthcheck:
-      test: ["CMD", "redis-cli", "ping"]
+      test: ["CMD", "redis-cli", "-a", "${REDIS_PASSWORD}", "ping"]
       interval: 5s
       timeout: 3s
+      retries: 5
+    # not exposed to host
+
+  postgres:
+    image: postgres:16-alpine
+    restart: always
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:?required}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?required}
+      POSTGRES_DB: ${POSTGRES_DB:?required}
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD", "pg_isready", "-U", "${POSTGRES_USER}"]
+      interval: 10s
+      timeout: 5s
       retries: 5
 
   server:
     build:
       context: ..
       dockerfile: deploy/Dockerfile.server
-    container_name: osm-server
+    restart: always
     depends_on:
-      redis:
-        condition: service_healthy
+      postgres: { condition: service_healthy }
+      redis:    { condition: service_healthy }
     ports:
-      - "8080:8080"
+      - "127.0.0.1:8080:8080"
     environment:
-      OSM_ENV: dev
-      OSM_HTTP_ADDR: ":8080"
-      OSM_DATABASE_URL: sqlite:///data/osm.db
-      OSM_REDIS_URL: redis://redis:6379
-      OSM_DEV_EXPOSE_OTP: "true"
-      OSM_PROXY_NODE_SECRET: ${OSM_PROXY_NODE_SECRET:-demo-proxy-secret}
-      OSM_CORS_ORIGINS: http://localhost:3030,http://localhost:3000
-      OSM_COOKIE_SECURE: "false"
-      OSM_PROXY_CNAME: nodes.osmrouter.demo
-    volumes:
-      - server-data:/data
+      OSM_ENV:               prod
+      OSM_HTTP_ADDR:         ":8080"
+      OSM_DATABASE_URL:      ${OSM_DATABASE_URL:?required}
+      OSM_REDIS_URL:         ${OSM_REDIS_URL:?required}
+      OSM_DEV_EXPOSE_OTP:    "false"
+      OSM_PROXY_NODE_SECRET: ${OSM_PROXY_NODE_SECRET:?required}
+      OSM_JWT_SECRET:        ${OSM_JWT_SECRET:?required}
+      OSM_OTP_MASTER_SECRET: ${OSM_OTP_MASTER_SECRET:?required}
+      OSM_CSRF_SECRET:       ${OSM_CSRF_SECRET:?required}
+      OSM_AES_MASTER_KEY:    ${OSM_AES_MASTER_KEY:?required}
+      OSM_CORS_ORIGINS:      ${OSM_CORS_ORIGINS:?required}
+      OSM_COOKIE_DOMAIN:     ${OSM_COOKIE_DOMAIN:?required}
+      OSM_COOKIE_SECURE:     "true"
+      OSM_PROXY_CNAME:       ${OSM_PROXY_CNAME:?required}
+      # SMTP — empty values fall back to NoopMailer (OTP logged, not sent).
+      SMTP_HOST:             ${SMTP_HOST:-}
+      SMTP_PORT:             ${SMTP_PORT:-587}
+      SMTP_USERNAME:         ${SMTP_USERNAME:-}
+      SMTP_PASSWORD:         ${SMTP_PASSWORD:-}
+      SMTP_FROM:             ${SMTP_FROM:-}
 
   proxy:
     build:
       context: ..
       dockerfile: deploy/Dockerfile.proxy
-    container_name: osm-proxy
+    restart: always
     depends_on:
-      redis:
-        condition: service_healthy
-      server:
-        condition: service_started
+      redis:  { condition: service_healthy }
+      server: { condition: service_started }
     ports:
-      - "8000:8000"   # public visitor traffic
-      - "8001:8001"   # tunnel listener (Mac client dials this)
+      - "8000:8000"   # visitor traffic (TLS-terminate in front; e.g., Caddy)
+      - "8443:8443"   # sidecar inbound (this listener IS TLS, with operator CA)
     environment:
-      OSM_PUBLIC_ADDR: ":8000"
-      OSM_TUNNEL_ADDR: ":8001"
-      OSM_REDIS_URL: redis://redis:6379
-      OSM_CONTROL_PLANE_URL: http://server:8080
-      OSM_PROXY_NODE_SECRET: ${OSM_PROXY_NODE_SECRET:-demo-proxy-secret}
-      OSM_NODE_ID: demo-proxy-01
+      OSM_PUBLIC_LISTEN_ADDR: ":8000"
+      OSM_TLS_LISTEN_ADDR:    ":8443"
+      OSM_CA_ROOT_PEM:        /etc/osm/ca/root.pem
+      OSM_CA_LEAF_CERT_PEM:   /etc/osm/ca/proxy-leaf.pem
+      OSM_CA_LEAF_KEY_PEM:    /etc/osm/ca/proxy-leaf.key
+      OSM_CONTROL_PLANE_URL:  http://server:8080
+      OSM_PROXY_NODE_SECRET:  ${OSM_PROXY_NODE_SECRET:?required}
+      OSM_NODE_ID:            ${OSM_NODE_ID:-proxy-v2-01}
+    volumes:
+      - ../ca:/etc/osm/ca:ro
 
   web:
     build:
       context: ..
       dockerfile: deploy/Dockerfile.web
       args:
-        NEXT_PUBLIC_API_BASE: http://localhost:8080
-    container_name: osm-web
+        NEXT_PUBLIC_API_BASE: ${NEXT_PUBLIC_API_BASE:?required}
+    restart: always
     depends_on:
       - server
     ports:
-      - "3030:3000"
+      - "127.0.0.1:3000:3000"
     environment:
-      NEXT_PUBLIC_API_BASE: http://localhost:8080
+      NEXT_PUBLIC_API_BASE: ${NEXT_PUBLIC_API_BASE}
+
+  # docs.osmrouter.com — Fumadocs static-rendered Next.js site.
+  # No DB/Redis dependency, no auth, no API calls at runtime; entirely static
+  # except for the /api/search endpoint which builds its index in-process.
+  docs:
+    build:
+      context: ..
+      dockerfile: deploy/Dockerfile.docs
+    restart: always
+    ports:
+      - "127.0.0.1:3001:3001"
 
 volumes:
-  server-data:
+  postgres-data:
+  redis-data:

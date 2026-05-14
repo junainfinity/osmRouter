@@ -1,0 +1,12 @@
+{
+  "title": "Web Dashboard",
+  "pages": [
+    "index",
+    "sign-up-and-sign-in",
+    "dashboard-home",
+    "domains",
+    "devices",
+    "settings",
+    "billing"
+  ]
+}

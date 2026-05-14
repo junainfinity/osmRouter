@@ -1,0 +1,13 @@
+{
+  "title": "DNS Cookbook",
+  "pages": [
+    "index",
+    "generic",
+    "godaddy",
+    "namecheap",
+    "cloudflare",
+    "hostinger",
+    "squarespace",
+    "porkbun"
+  ]
+}

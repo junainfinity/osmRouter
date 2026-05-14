@@ -1,0 +1,73 @@
+---
+title: Generic DNS
+description: "Works for any registrar — record values you will need."
+---
+
+import { Callout } from "fumadocs-ui/components/callout";
+
+Most domain registrars give you a "DNS records" or "Manage DNS" screen with a table of records: type, name, value, TTL. osmRouter needs two of them.
+
+## The records
+
+| # | Type | Name | Value | TTL |
+|---|---|---|---|---|
+| 1 | `A` | `@` (or your apex, e.g. `example.com`) | `157.180.124.246` | `600` |
+| 2 | `A` | `*` (wildcard) | `157.180.124.246` | `600` |
+
+That's it. Two A records, both pointing at our edge IP.
+
+<Callout type="info">
+  The IP shown here is osmRouter's primary edge. Multi-region edges are coming in v2.1 — if you see different IPs in the Add-domain modal, use those instead.
+</Callout>
+
+## Why two records
+
+- The **apex `A`** (`@`) routes traffic for the bare domain (e.g. `example.com`) to our edge.
+- The **wildcard `A`** (`*`) routes traffic for every undefined subdomain (e.g. `api.example.com`, `app.example.com`) to the same edge.
+
+Without the wildcard, only the apex works. You'd have to add a new `A` record at the registrar every time you create a subdomain — annoying and slow.
+
+## TTL
+
+`600` (10 minutes) is a sane default. Lower means faster propagation when you change records; higher means less DNS server load. Anything in the 300–3600 range is fine.
+
+## What to do if your registrar requires the bare name (not `@`)
+
+Some registrars don't accept `@` for the apex. Use one of these instead:
+
+- The full domain itself (e.g. `example.com`)
+- A blank Name field
+- A single space
+
+The validator only cares about the resolved value — it doesn't care which UI convention your registrar uses.
+
+## Verifying propagation
+
+After saving the records, you can confirm they're live with `dig`:
+
+```bash
+$ dig example.com +short
+157.180.124.246
+
+$ dig api.example.com +short
+157.180.124.246
+```
+
+If both return the right IP, you're done — the osmRouter verifier will catch up within a minute.
+
+## Per-registrar walkthroughs
+
+The Add-domain modal in the dashboard has inline tabs for the registrars most osmRouter customers use. Standalone pages here:
+
+- [GoDaddy](/docs/dns/godaddy)
+- [Namecheap](/docs/dns/namecheap)
+- [Cloudflare](/docs/dns/cloudflare)
+- [Hostinger](/docs/dns/hostinger)
+- [Squarespace](/docs/dns/squarespace)
+- [Porkbun](/docs/dns/porkbun)
+
+## Common pitfalls
+
+- **TXT instead of A.** osmRouter does NOT use TXT records for verification. If a guide tells you to add one, it's outdated.
+- **CNAME instead of A.** The apex (`@`) cannot be a CNAME per the DNS spec. Some registrars hide this with "CNAME flattening" or "ALIAS" records — those work for the apex, but the wildcard *must* be `A`.
+- **`*.example.com` as the Name field instead of `*`.** Some registrars expect just `*`, others want `*.example.com`. The validator only sees the resolved value, so use whichever your registrar accepts.

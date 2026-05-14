@@ -1,0 +1,74 @@
+---
+title: Serve pane
+description: "Pick your CLIs, set the API key, see live model IDs."
+---
+
+import { Callout } from "fumadocs-ui/components/callout";
+
+The Serve pane is osmBroker's control center. It's where you start the broker, set the port + API key, and see the live set of models being served.
+
+![osmBroker Serve pane in the LIVE state](/screenshots/osmbroker/serve.png)
+
+## Sections, top to bottom
+
+### Status line
+
+`Live · 192.168.68.102:8080` (or whatever the broker is bound to).
+
+When you click **Start broker**, the broker starts listening on the configured port. The status line switches to **Live** with the current bind. When the broker is off, it shows **Stopped** and the controls in the left rail are inactive.
+
+### LAN reach + Same-Mac reach
+
+Two URLs:
+
+- **LAN reach** — `http://<your-lan-ip>:<port>`. Use this from another device on the same Wi-Fi/Ethernet. Anyone on this network can reach it with the Bearer API key.
+- **Same-Mac reach** — `http://localhost:<port>`. Use this from another process on the same Mac.
+
+Both have **Copy** buttons.
+
+### Configuration
+
+Two text fields:
+
+- **Port** — the TCP port the broker listens on. Defaults to `8080`. Changes take effect the **next** time you click Start broker; the broker doesn't restart when you edit this while it's running.
+- **API key** — the Bearer token clients must send as `Authorization: Bearer <key>`. Set anything you want — it's a shared secret, not a cryptographically verified identity. Same restart rule as Port.
+
+<Callout type="warn">
+  The UI may show a key you've **typed but not applied yet**. If a client gets HTTP 401, check that the running broker is using the key you expect. Click **Stop broker** + **Start broker** to apply pending changes.
+</Callout>
+
+### Models served
+
+A card per enabled CLI, with a row for each model ID. The model IDs in this list are exactly what clients should pass as the `model` field in their requests.
+
+In the screenshot above, the broker is serving 7 models — 3 from Claude Code (`sonnet`, `opus`, `haiku`) and 4 from Codex CLI (`gpt-5.5`, `gpt-5-codex`, `gpt-5`, `gpt-5-mini`).
+
+Each model ID has a **Copy** button so you can paste the exact string into your client's "Model" field.
+
+### Client hints (below Models served)
+
+A pre-filled set of "paste this here" hints for the most common client apps. For AnythingLLM, Open WebUI, LiteLLM, and the OpenAI Python SDK, you get the exact field names and values to fill in. See [Plug into clients](/docs/osmbroker/plug-in-clients) for the same info as a standalone page.
+
+## Left rail — sidecar status
+
+The left rail shows the **always-on state**:
+
+- **STATUS** — `Live · <ip>:<port>` or `Stopped`.
+- **BASE URL** — the LAN URL and the localhost URL, both with Copy buttons.
+- **API KEY** — the *running* key (not the typed-but-not-applied one).
+- **Theme toggle** at the bottom — auto / light / dark.
+
+## Start / Stop semantics
+
+- **Start broker** — opens a TCP listener on the configured port and starts the dispatch loop.
+- **Stop broker** — closes the listener and waits ~3 seconds for in-flight requests to drain. Any child CLIs spawned for stream processing exit when their request finishes.
+- **Test key** — hits `GET /v1/models` against the *running* broker using the *typed* API key. Shows a green pip if the response is 200. Useful for catching the typed-vs-running mismatch.
+
+## When you change something
+
+Editing fields doesn't restart the broker — by design, so you can edit calmly while it's serving. The rule of thumb: anything in **Configuration** (Port, API key) applies on next **Start broker** click. Anything in **Models** (toggling models on/off) applies on the **next request** the broker receives. The pill near the top reminds you of this state.
+
+## Where to go next
+
+- [Plug into AnythingLLM / OpenWebUI / LiteLLM](/docs/osmbroker/plug-in-clients) — exact strings to paste.
+- [Supported CLIs](/docs/osmbroker/supported-clis) — what each underlying CLI does and how osmBroker talks to it.

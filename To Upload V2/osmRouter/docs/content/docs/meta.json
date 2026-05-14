@@ -1,0 +1,22 @@
+{
+  "title": "osmRouter docs",
+  "pages": [
+    "index",
+    "---Getting Started---",
+    "getting-started",
+    "---Concepts---",
+    "concepts",
+    "---Web Dashboard---",
+    "dashboard",
+    "---Mac App---",
+    "mac-app",
+    "---osmBroker---",
+    "osmbroker",
+    "---DNS Cookbook---",
+    "dns",
+    "---Troubleshooting---",
+    "troubleshooting",
+    "---Resources---",
+    "resources"
+  ]
+}

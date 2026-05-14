@@ -115,6 +115,17 @@ services:
     environment:
       NEXT_PUBLIC_API_BASE: ${NEXT_PUBLIC_API_BASE}
 
+  # docs.osmrouter.com — Fumadocs static-rendered Next.js site.
+  # No DB/Redis dependency, no auth, no API calls at runtime; entirely static
+  # except for the /api/search endpoint which builds its index in-process.
+  docs:
+    build:
+      context: ..
+      dockerfile: deploy/Dockerfile.docs
+    restart: always
+    ports:
+      - "127.0.0.1:3001:3001"
+
 volumes:
   postgres-data:
   redis-data:

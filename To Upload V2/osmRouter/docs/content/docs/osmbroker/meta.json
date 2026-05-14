@@ -1,0 +1,10 @@
+{
+  "title": "osmBroker",
+  "pages": [
+    "index",
+    "overview",
+    "supported-clis",
+    "serve-pane",
+    "plug-in-clients"
+  ]
+}

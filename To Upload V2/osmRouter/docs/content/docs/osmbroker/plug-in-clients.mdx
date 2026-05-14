@@ -1,0 +1,139 @@
+---
+title: Plug into AnythingLLM / OpenWebUI / LiteLLM
+description: "Exact field values to paste."
+---
+
+import { Tabs, Tab } from "fumadocs-ui/components/tabs";
+import { Callout } from "fumadocs-ui/components/callout";
+
+osmBroker speaks the OpenAI Chat Completions API, so any client that accepts a custom OpenAI-compatible base URL works. Below are the exact fields for the most common ones.
+
+<Callout type="info">
+  Where you see `https://YOUR-DOMAIN.com` below, substitute the domain you've bound to osmBroker via osmRouter. Where you see `<your-key>`, paste the API key you set on the [Serve pane](/docs/osmbroker/serve-pane). Model IDs (`sonnet`, `gpt-5.5`, etc.) come from osmBroker's live **Models served** list.
+</Callout>
+
+<Tabs items={["AnythingLLM", "Open WebUI", "LiteLLM proxy", "OpenAI Python SDK", "OpenAI JS SDK", "curl"]}>
+
+<Tab value="AnythingLLM">
+
+**Settings → LLM Provider → "Generic OpenAI"**
+
+| Field | Value |
+|---|---|
+| Base URL | `https://YOUR-DOMAIN.com/v1` |
+| API Key | `<your-key>` |
+| Chat Model Name | one of the IDs from the **Models served** list (e.g. `sonnet`) |
+| Token Context Window | `200000` (Claude family) or `128000` (Codex family) |
+| Max Tokens | `4096` is a safe default |
+
+Click **Save changes**, then **Test Chat** in the right sidebar.
+
+</Tab>
+
+<Tab value="Open WebUI">
+
+**Settings → Admin Panel → Connections → OpenAI API**
+
+| Field | Value |
+|---|---|
+| API Base URL | `https://YOUR-DOMAIN.com/v1` |
+| API Key | `<your-key>` |
+
+Click **+ Add Connection**, then **Save**. The model IDs from osmBroker's live list appear in the model dropdown on the chat screen.
+
+</Tab>
+
+<Tab value="LiteLLM proxy">
+
+In your `config.yaml`:
+
+```yaml
+model_list:
+  - model_name: osm-sonnet
+    litellm_params:
+      model: openai/sonnet
+      api_base: https://YOUR-DOMAIN.com/v1
+      api_key: <your-key>
+  - model_name: osm-gpt-5.5
+    litellm_params:
+      model: openai/gpt-5.5
+      api_base: https://YOUR-DOMAIN.com/v1
+      api_key: <your-key>
+```
+
+Then `litellm --config config.yaml`. Your downstream clients call LiteLLM's port; LiteLLM forwards to osmBroker.
+
+</Tab>
+
+<Tab value="OpenAI Python SDK">
+
+```python
+from openai import OpenAI
+
+client = OpenAI(
+    base_url="https://YOUR-DOMAIN.com/v1",
+    api_key="<your-key>",
+)
+
+resp = client.chat.completions.create(
+    model="sonnet",
+    messages=[{"role": "user", "content": "What is 5 + 7?"}],
+    stream=True,
+)
+
+for chunk in resp:
+    print(chunk.choices[0].delta.content or "", end="")
+```
+
+Streaming **is required** — osmBroker is streaming-only by design (see [Troubleshooting / Upstream errors](/docs/troubleshooting/upstream-errors) for why non-streaming requests hang).
+
+</Tab>
+
+<Tab value="OpenAI JS SDK">
+
+```ts
+import OpenAI from "openai";
+
+const client = new OpenAI({
+  baseURL: "https://YOUR-DOMAIN.com/v1",
+  apiKey: "<your-key>",
+});
+
+const stream = await client.chat.completions.create({
+  model: "sonnet",
+  messages: [{ role: "user", content: "What is 5 + 7?" }],
+  stream: true,
+});
+
+for await (const chunk of stream) {
+  process.stdout.write(chunk.choices[0]?.delta?.content ?? "");
+}
+```
+
+</Tab>
+
+<Tab value="curl">
+
+```bash
+curl -N \
+  -H "Authorization: Bearer <your-key>" \
+  -H "Content-Type: application/json" \
+  -X POST https://YOUR-DOMAIN.com/v1/chat/completions \
+  -d '{
+    "model": "sonnet",
+    "messages": [{"role": "user", "content": "What is 5 + 7?"}],
+    "stream": true
+  }'
+```
+
+The `-N` is important: it disables curl's output buffering so you see SSE chunks as they arrive.
+
+</Tab>
+
+</Tabs>
+
+## Common pitfalls
+
+- **HTTP 401 from a working broker** — the broker's *running* API key differs from the one you typed in the UI. Stop + Start the broker to apply.
+- **HTTP 400 "model not supported when using Codex with a ChatGPT account"** — your Codex auth tier doesn't include this model. Remove it from the Models tab, or upgrade your Codex auth.
+- **Streaming required** — clients that hard-code `stream: false` will time out. See [Upstream errors](/docs/troubleshooting/upstream-errors).
