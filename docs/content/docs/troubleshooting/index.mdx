@@ -8,6 +8,6 @@ Most "it doesn't work" reports turn out to be one of three things:
 
 1. **The sidecar isn't running**, or is running with a stale `--local-port` flag.
 2. **The local service isn't actually listening** on the port you bound.
-3. **The upstream API is rejecting the request** (model not in plan, rate limited, etc.) — and osmBroker is correctly passing the error through.
+3. **The local service itself is returning the error** (4xx, 5xx, rate-limited, etc.) — the tunnel is passing it through correctly.
 
 See [Tunnel diagnostics](/docs/troubleshooting/tunnel-diagnostics) for the systematic walk.

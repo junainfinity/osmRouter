@@ -229,7 +229,7 @@ For the full threat model, see the comments in `server/internal/auth/` and the r
 - **`FlushInterval = -1` on the proxy's `ReverseProxy`** — every SSE chunk hits the visitor in real time. The default would buffer for 200 ms, which breaks word-by-word LLM streaming.
 - **`ResponseHeaderTimeout = 30 s` on the sidecar** — first byte must arrive within 30 s. Long-running inference is fine *after* the first byte; only cold-start matters here. Bump if your upstream is slow.
 - **No wall-clock timeout on the visitor end** — only visitor cancellation kills the request. A `curl -N` from a phone over LTE that runs for 4 minutes works fine.
-- **Non-streaming requests to streaming-only upstreams** — osmBroker is streaming-only (the underlying CLI bridges are streaming). A client that asks for `stream: false` will hang until the timeout. The docs site (`docs/content/docs/troubleshooting/upstream-errors.mdx`) covers this.
+- **Streaming-only upstreams** — if your local service only supports streaming (SSE/chunked) responses, a client that asks for a non-streaming response will hang until the sidecar's `ResponseHeaderTimeout`. The docs at `docs/content/docs/troubleshooting/upstream-errors.mdx` cover this.
 
 ---
 

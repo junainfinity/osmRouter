@@ -11,7 +11,7 @@ The Services tab is the answer to "what's running on this Mac that I could expos
 
 The sidecar runs `lsof -nP -iTCP -sTCP:LISTEN` every few seconds and tries an HTTP `GET /` against each result. It then classifies each listener:
 
-- **OPENAI COMPATIBLE** — responded with `application/json` containing a `data: [{id: ...}]` shape. Almost certainly an OpenAI-style endpoint (osmBroker, LM Studio, Ollama, vLLM, anything that speaks the chat-completions API).
+- **OPENAI COMPATIBLE** — responded with `application/json` containing a `data: [{id: ...}]` shape. Almost certainly an OpenAI-style endpoint (LM Studio, Ollama, vLLM, anything that speaks the chat-completions API).
 - **HTTP** — responded with valid HTTP headers but the body didn't match a known API shape.
 - **TCP service** — accepted the connection but didn't respond to HTTP. Could be a database, a TLS server, a custom protocol.
 - **UNKNOWN** — listening, but didn't answer the probe.

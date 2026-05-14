@@ -42,9 +42,9 @@ export default function HomePage() {
             href: "/docs/mac-app/install-and-signin",
           },
           {
-            t: "Serve AI models",
-            d: "Expose Claude Code, Codex, and local LMs via osmBroker.",
-            href: "/docs/osmbroker/overview",
+            t: "Troubleshooting",
+            d: "When the tunnel is up but requests aren't landing — walk this list.",
+            href: "/docs/troubleshooting/tunnel-diagnostics",
           },
         ].map((c) => (
           <Link

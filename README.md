@@ -76,10 +76,10 @@ Caddy on the edge mints Let's Encrypt certs on-demand for any verified customer 
 </td>
 <td width="50%" valign="top">
 
-### 🤖 osmBroker — AI CLIs as one OpenAI API
-Aggregate Claude Code, Codex, Gemini, Ollama, LM Studio, and 11 other terminal agents into one OpenAI-compatible HTTP endpoint. Plug into AnythingLLM, Open WebUI, LiteLLM — anything.
+### 🔎 Live request inspector
+Every request that passes through your tunnel streams into the Mac app's Inspector tab with timing, method, status, path, ms, and size. No external observability stack required.
 
-<img src="assets/screenshot-broker-serve.png" alt="osmBroker — Serve pane" />
+<img src="assets/screenshot-mac-inspector.png" alt="Mac app — Live request inspector" />
 
 </td>
 </tr>
@@ -163,18 +163,17 @@ osmRouter/
 
 ---
 
-## Use-case: an OpenAI-compatible LLM endpoint on your own Mac
+## What you can put behind it
 
-Pair osmRouter with **osmBroker** (a sibling project — a separate Mac app that fronts 16 terminal AI agents) and you've got:
+Anything that speaks HTTP on a local port. A few obvious targets:
 
-- A public HTTPS URL on a domain you own
-- Running inference on hardware you own
-- Charged against *your* underlying API keys (your Anthropic plan, your ChatGPT account, your Ollama process)
-- Speaking the OpenAI Chat Completions API so every client (AnythingLLM, Open WebUI, LiteLLM, OpenAI SDKs) plugs in unchanged
+- A **dev server** (Next.js, Rails, FastAPI) you want to show a collaborator without deploying.
+- An **internal app** running on a Mac mini in your office — exposed only to a verified domain, never on a public IP.
+- A **media server** (Plex, Jellyfin) bound to a subdomain you control.
+- **Any OpenAI-API-compatible inference server** (LM Studio, Ollama, vLLM, llama-server) — long-running streaming inference survives the tunnel intact.
+- A **webhook receiver** that needs a stable public URL while its sidecar moves between your home, your laptop, and your office.
 
-<img src="assets/screenshot-broker-models.png" alt="osmBroker — Models tab" width="80%" />
-
-The brokered model list above shows 7 models from 2 CLIs (Claude Code + Codex), all served at one local port via one shared API key, exposed to the world via one osmRouter tunnel.
+The tunnel doesn't care what's on the other side; it only cares that the bytes flow.
 
 ---
 
