@@ -203,7 +203,7 @@ See [`LAUNCH.md` §10](LAUNCH.md#10-whats-open--whats-deferred-to-v21) for the l
 
 ## License
 
-TBD. If you're forking this for commercial use, please reach out at [hello@osmapi.com](mailto:hello@osmapi.com).
+TBD. If you're forking this for commercial use, please reach out at [info@osmapi.com](mailto:info@osmapi.com).
 
 ---
 
