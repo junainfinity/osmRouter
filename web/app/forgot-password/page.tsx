@@ -7,12 +7,11 @@ import { AuthShell } from "@/components/auth/auth-shell";
 import { Button } from "@/components/ui/button";
 import { Field, Input } from "@/components/ui/input";
 import { Spinner } from "@/components/ui/spinner";
-import { api, ApiError, fetchCSRF } from "@/lib/api";
+import { api, ApiError } from "@/lib/api";
 
-export default function LoginPage() {
+export default function ForgotPasswordPage() {
   const router = useRouter();
   const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -21,51 +20,48 @@ export default function LoginPage() {
     setSubmitting(true);
     setError(null);
     try {
-      await api("/api/v1/auth/login", { method: "POST", body: { email, password } });
-      await fetchCSRF().catch(() => {});
-      router.push("/dashboard");
+      await api("/api/v1/auth/forgot-password", { method: "POST", body: { email } });
+      // On success, jump straight to the reset page with the email pre-filled.
+      router.push(`/reset-password?email=${encodeURIComponent(email)}`);
     } catch (err) {
       const e = err as ApiError;
-      setError(e.message || "Unable to sign in");
+      // The server returns EMAIL_NOT_REGISTERED with a clear message — pass it through.
+      setError(e.message || "Unable to send reset code");
     } finally {
       setSubmitting(false);
     }
   };
 
   return (
-    <AuthShell tagline="Welcome back.">
+    <AuthShell tagline="Lost your password? Let's fix that.">
       <div className="mb-7">
-        <h1 className="text-[26px] font-semibold tracking-[-0.02em] m-0">Sign in</h1>
+        <h1 className="text-[26px] font-semibold tracking-[-0.02em] m-0">Reset your password</h1>
         <div className="text-[13.5px] text-[var(--text-muted)] mt-1.5">
-          Enter your credentials to access your dashboard.
+          Enter the email you signed up with. We&apos;ll send a 6-digit reset code.
         </div>
       </div>
 
       <form onSubmit={submit} className="flex flex-col gap-3.5">
         <Field label="Email">
-          <Input type="email" placeholder="you@example.com" value={email} onChange={(e) => setEmail(e.target.value)} required />
-        </Field>
-        <Field label="Password">
-          <Input type="password" placeholder="Password" value={password} onChange={(e) => setPassword(e.target.value)} required />
-          <div className="mt-1.5 text-right">
-            <Link
-              href="/forgot-password"
-              className="text-[12px] text-[var(--text-muted)] hover:text-[var(--text)]"
-            >
-              Forgot password?
-            </Link>
-          </div>
+          <Input
+            type="email"
+            placeholder="you@example.com"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            required
+            autoFocus
+          />
         </Field>
 
         {error && <div className="text-xs text-[var(--danger)]">{error}</div>}
 
         <Button type="submit" variant="primary" disabled={submitting} full size="lg" className="mt-2">
-          {submitting ? <><Spinner size={14} /> Signing in…</> : "Sign in"}
+          {submitting ? <><Spinner size={14} /> Sending code…</> : "Send reset code"}
         </Button>
       </form>
 
       <div className="mt-5 text-center text-[13px] text-[var(--text-muted)]">
-        New here? <Link href="/signup" className="text-[var(--text)] font-medium">Create an account</Link>
+        Remembered it? <Link href="/login" className="text-[var(--text)] font-medium">Back to sign in</Link>
       </div>
     </AuthShell>
   );
