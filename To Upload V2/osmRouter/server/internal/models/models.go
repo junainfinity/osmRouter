@@ -155,10 +155,14 @@ type Domain struct {
 
 // Subdomain is a routing rule under a Domain.
 // Prefix may be empty (apex routing).
+// Subdomain represents one (parent domain, label) pair the user has bound or
+// intends to bind to a device port. The composite unique index on
+// (parent_domain_id, prefix) is enforced at the DB level so the Mac app's
+// Domains tab never shows duplicate rows for the same hostname.
 type Subdomain struct {
 	ID             string     `gorm:"primaryKey;size:36" json:"id"`
-	ParentDomainID string     `gorm:"index;size:36;not null" json:"parent_domain_id"`
-	Prefix         string     `gorm:"size:63" json:"prefix"`
+	ParentDomainID string     `gorm:"index;size:36;not null;uniqueIndex:idx_subdomain_parent_prefix" json:"parent_domain_id"`
+	Prefix         string     `gorm:"size:63;uniqueIndex:idx_subdomain_parent_prefix" json:"prefix"`
 	TargetPort     int        `gorm:"default:0" json:"target_port"`
 	BoundDeviceID  *string    `gorm:"size:36;index" json:"bound_device_id,omitempty"`
 	BoundAt        *time.Time `json:"bound_at,omitempty"`
